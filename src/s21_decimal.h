@@ -1,11 +1,12 @@
-#include <stdio.h>
-
-#define OK 0
-#define TOO_MUCH
-#define TOO_LOW
-#define NAN
+#ifndef S21_DECIMAL
+#define S21_DECIMAL
 
 typedef struct 
 {
   int bits[4];
+
 } s21_decimal;
+
+
+
+#endif 
