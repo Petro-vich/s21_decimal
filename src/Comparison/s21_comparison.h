@@ -3,7 +3,7 @@
 
 #include "../s21_decimal.h"
 
-enum ERROR_CODES { FALSE, TRUE };
+enum ERROR_CODES_COMP { FALSE, TRUE };
 
   int s21_is_less(s21_decimal, s21_decimal); // Less than	<	
   int s21_is_less_or_equal(s21_decimal, s21_decimal); // Less than or equal to	<=	

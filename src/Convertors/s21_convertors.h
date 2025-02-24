@@ -3,7 +3,9 @@
 
 #include "../s21_decimal.h"
 
-enum ERROR_CODES { OK, CONVERSION_ERROR };
+enum ERROR_CODES_CNV { CNV_OK, CONVERSION_ERROR };
+// 0 — OK;
+// 1 — ошибка конвертации.
 
   int s21_from_int_to_decimal(int src, s21_decimal *dst); // Из int	
   int s21_from_float_to_decimal(float src, s21_decimal *dst); // Из float	
