@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <limits.h>
 
 #include "../s21_decimal.h"
@@ -8,7 +7,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst){
     if (!dst) {
         return CONVERSION_ERROR;
     }
-    dst = {0}
+    dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
     if (src<0) {
         dst->bits[3] |= 0x80000000;
         if (src != INT_MIN) {
@@ -16,12 +15,5 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst){
     }
     } 
     dst->bits[0] = src;
-    return OK;
+    return CNV_OK;
 }
-=======
-#include "s21_convertors.h"
-
-int s21_from_int_to_decimal(int src, s21_decimal *dst) {  // Из int
-  return 0;
-}
->>>>>>> refs/remotes/origin/main

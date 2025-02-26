@@ -26,7 +26,7 @@ s21_decimal.a: $(ALL_SRC_OBJ)
 	ar rcs $@ $(ALL_SRC_OBJ)
 
 test: s21_decimal.a
-	$(CC) -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
+	$(CC) -D__DEBUG -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
 	./tests/test_decimal
 
 test_valgrind: s21_decimal.a
