@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <limits.h>
 
 #include "../s21_decimal.h"
@@ -17,3 +18,10 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst){
     dst->bits[0] = src;
     return OK;
 }
+=======
+#include "s21_convertors.h"
+
+int s21_from_int_to_decimal(int src, s21_decimal *dst) {  // Из int
+  return 0;
+}
+>>>>>>> refs/remotes/origin/main
