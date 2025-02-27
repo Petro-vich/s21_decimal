@@ -49,6 +49,23 @@ void check_decimal_conversion(int num, s21_decimal decimal_check) {
     #endif
 }
 
+void print_float_test_result(const char *test_name, float src, s21_decimal result, int code) {
+    #if defined(__DEBUG)
+    printf("---------------------------------\n");
+    printf("Test: %s\n", test_name);
+    printf("Input float: %f\n", src);
+    if (code == 0) {
+        printf("Result:\n");
+        s21_print_decimal_bits(result);
+        s21_print_decimal_string(result);
+        printf("sign = %d\n", (result.bits[3] & 0x80000000) ? 1 : 0);
+    } else {
+        printf("Result: CONVERSION_ERROR\n");
+    }
+    printf("---------------------------------\n");
+    #endif
+}
+
 START_TEST(test_fail) {
     int num = -2147483648;
     int result = s21_from_int_to_decimal(num, NULL);
@@ -72,6 +89,103 @@ START_TEST(test_decimal_ok_v2){
 }
 END_TEST
 
+
+
+START_TEST(test_float_positive) {
+    float src = 123.456f;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, 0);
+
+
+    ck_assert_int_eq(result.bits[0], 1234560); 
+    ck_assert_int_eq(result.bits[1], 0);       
+    ck_assert_int_eq(result.bits[2], 0);        
+
+
+    ck_assert_int_eq(result.bits[3], 3 << 16); 
+
+    print_float_test_result("test_float_positive", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_negative) {
+    float src = -123.456f;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, 0);
+
+    ck_assert_int_eq(result.bits[0], 1234560);  
+    ck_assert_int_eq(result.bits[1], 0);        
+    ck_assert_int_eq(result.bits[2], 0);       
+
+    ck_assert_int_eq(result.bits[3], (int)(0x80000000u | (3 << 16))); 
+
+    print_float_test_result("test_float_negative", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_zero) {
+    float src = 0.0f;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, 0);
+    ck_assert_int_eq(result.bits[0], 0);
+    ck_assert_int_eq(result.bits[1], 0);
+    ck_assert_int_eq(result.bits[2], 0);
+    ck_assert_int_eq(result.bits[3], 0);
+
+    print_float_test_result("test_float_zero", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_too_small) {
+    float src = 1e-29f;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+
+    print_float_test_result("test_float_too_small", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_too_large) {
+    float src = 8e28f;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+
+    print_float_test_result("test_float_too_large", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_nan) {
+    float src = NAN;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+
+    print_float_test_result("test_float_nan", src, result, code);
+}
+END_TEST
+
+START_TEST(test_float_infinity) {
+    float src = INFINITY;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(src, &result);
+
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+
+    print_float_test_result("test_float_infinity", src, result, code);
+}
+END_TEST
+
 Suite *decimal_suite(void) {
     Suite *s;
     TCase *tc_core;
@@ -82,6 +196,14 @@ Suite *decimal_suite(void) {
     tcase_add_test(tc_core, test_fail);
     tcase_add_test(tc_core, test_decimal_ok);
     tcase_add_test(tc_core, test_decimal_ok_v2);
+
+    tcase_add_test(tc_core, test_float_positive);
+    tcase_add_test(tc_core, test_float_negative);
+    tcase_add_test(tc_core, test_float_zero);
+    tcase_add_test(tc_core, test_float_too_small);
+    tcase_add_test(tc_core, test_float_too_large);
+    tcase_add_test(tc_core, test_float_nan);
+    tcase_add_test(tc_core, test_float_infinity);
 
     suite_add_tcase(s, tc_core);
 
