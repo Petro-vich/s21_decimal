@@ -244,6 +244,57 @@ START_TEST(test_from_decimal_to_float_fail) {
 }
 END_TEST
 
+START_TEST(s21_from_decimal_to_int_1) {
+    s21_decimal dec = { { 12345, 0, 0, 0 } };
+    int result = 0;
+    int code = s21_from_decimal_to_int(dec, &result);
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result, 12345);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_2) {
+    s21_decimal dec = { { 12345, 0, 0, 0x00020000 } };  // scale = 2
+    int result = 0;
+    int code = s21_from_decimal_to_int(dec, &result);
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result, 123);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_3) {
+    s21_decimal dec = { { 9876, 0, 0, 0x80000000 } };
+    int result = 0;
+    int code = s21_from_decimal_to_int(dec, &result);
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result, -9876);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_4) {
+    s21_decimal dec = { { 9876, 0, 0, 0x80010000 } };  // scale = 1
+    int result = 0;
+    int code = s21_from_decimal_to_int(dec, &result);
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result, -987);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_5) {
+    s21_decimal dec = { { 12345, 1, 0, 0 } };
+    int result = 0;
+    int code = s21_from_decimal_to_int(dec, &result);
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_6) {
+    s21_decimal dec = { { 12345, 0, 0, 0 } };
+    int code = s21_from_decimal_to_int(dec, NULL);
+    ck_assert_int_eq(code, CONVERSION_ERROR);
+}
+END_TEST
+
 Suite *decimal_suite(void) {
   Suite *s;
   TCase *tc_core;
@@ -266,6 +317,13 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_from_decimal_to_float);
   tcase_add_test(tc_core, test_from_decimal_to_float_scale_3);
   tcase_add_test(tc_core, test_from_decimal_to_float_fail);
+
+  tcase_add_test(tc_core, s21_from_decimal_to_int_1);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_2);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_3);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_4);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_5);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_6);
 
   suite_add_tcase(s, tc_core);
 
