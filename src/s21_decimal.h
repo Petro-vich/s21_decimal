@@ -1,6 +1,8 @@
 #ifndef S21_DECIMAL
 #define S21_DECIMAL
 
+#include <math.h>
+
 typedef struct 
 {
   int bits[4];
