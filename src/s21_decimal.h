@@ -9,6 +9,13 @@ typedef struct
 
 } s21_decimal;
 
+typedef struct 
+{
+  int bits[8];
+
+} s21_big_decimal;
+
+
 #include "Arithmetic/s21_arithmetic.h"
 #include "Comparison/s21_comparison.h"
 #include "Convertors/s21_convertors.h"
