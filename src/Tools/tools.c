@@ -126,3 +126,22 @@ void zero_decimal(s21_decimal *num) {
   num->bits[3] = 0;
 
 }
+
+void add(s21_decimal a, s21_decimal b, s21_decimal *result) {
+  int carry = 0;
+
+  for (int i = 0; i < 3; i++) {
+    uint64_t temp = (uint64_t)a.bits[i] + b.bits[i] + carry;
+    result->bits[i] = (uint32_t)(temp & 0xFFFFFFFF);
+    carry = (temp >> 32) ? 1 : 0;
+
+  }
+}
+
+int is_overflow (s21_decimal *num){
+  if (num->bits[2] > 0xFFFFFFFF || num->bits[1] > 0xFFFFFFFF || num->bits[0] > 0xFFFFFFFF) {
+    return 1;
+  }
+  return 0;
+
+}

@@ -9,8 +9,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     zero_decimal(result);
     int sign = ((value_1.bits[3] >> 31) == (value_2.bits[3] >> 31)) ? 0 : 1;
 
-    s21_decimal abs_1 = absoulute_decimal(value_1);
-    s21_decimal abs_2 = absoulute_decimal(value_2);
+    s21_decimal abs_1 = absolute_decimal(value_1);
+    s21_decimal abs_2 = absolute_decimal(value_2);
 
     normalize_scales(&abs_1, &abs_2);
 
@@ -39,7 +39,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
                 fractional.bits[0]++; // оргругляем до ближайшего четного
             }
         }
-    }}
+    }
 
     
     combine_parts(quotient, fractional, scale, result);
