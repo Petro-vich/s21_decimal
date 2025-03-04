@@ -36,7 +36,7 @@ void check_decimal_conversion(int num, s21_decimal decimal_check) {
 // Отладочный вывод
 #if defined(__DEBUG)
   printf("---------------------------------\n");
-  printf("Test:\n");
+  printf("Test: %s\n", "s21_from_int_to_decimal");
   printf("number: %d\n", num);
   printf("Check:\n");
   s21_print_decimal_bits(decimal_check);
