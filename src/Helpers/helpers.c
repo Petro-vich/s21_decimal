@@ -30,3 +30,17 @@ int s21_get_sign(s21_decimal decimal) {
   return s21_get_bit(decimal,
                      127);  // 0 for positive number, 1 for negative number
 }
+
+/*
+Функция проверяет, включен бит или нет
+*/
+int s21_bit_check(unsigned int num, unsigned int bit_num) {
+  return num & (1 << bit_num);
+}
+
+/*
+Функция проверяет, включает бит
+*/
+int s21_bit_add(unsigned num, unsigned int bit_num) { 
+  return num | (1 << bit_num); 
+}
