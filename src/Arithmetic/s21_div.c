@@ -1,4 +1,6 @@
 #include "s21_arithmetic.h"
+#include "./../Tools/tools.h"
+
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if(is_zero (value_2)){
