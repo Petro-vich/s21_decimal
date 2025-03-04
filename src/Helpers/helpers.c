@@ -39,7 +39,7 @@ int s21_bit_check(unsigned int num, unsigned int bit_num) {
 }
 
 /*
-Функция проверяет, включает бит
+Функция, включает бит
 */
 int s21_bit_add(unsigned num, unsigned int bit_num) { 
   return num | (1 << bit_num); 
