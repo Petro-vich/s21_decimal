@@ -295,6 +295,29 @@ START_TEST(s21_from_decimal_to_int_6) {
 }
 END_TEST
 
+
+START_TEST(test_s21_add_1) {
+  s21_decimal a = {{1, 0, 0, 0}};
+  s21_decimal b = {{1, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_add(a, b, &result);
+  ck_assert_int_eq(code, 0);
+  ck_assert_int_eq(result.bits[0], 2);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3], 0);
+}
+END_TEST
+
+START_TEST(test_s21_add_2) {
+  s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+  s21_decimal b = {{1, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_add(a, b, &result);
+  ck_assert_int_eq(code, 1);
+}
+END_TEST
+
 Suite *decimal_suite(void) {
   Suite *s;
   TCase *tc_core;
@@ -324,6 +347,11 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_from_decimal_to_int_4);
   tcase_add_test(tc_core, s21_from_decimal_to_int_5);
   tcase_add_test(tc_core, s21_from_decimal_to_int_6);
+
+  tcase_add_test(tc_core, test_s21_add_1);
+  tcase_add_test(tc_core, test_s21_add_2);
+  // tcase_add_test(tc_core, test_s21_add_3);
+  // tcase_add_test(tc_core, test_s21_add_4);
 
   suite_add_tcase(s, tc_core);
 
