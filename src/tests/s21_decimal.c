@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define CONV_ERR 1
-
+#define TEST_ARITHMETIC_OK 0
 // Вспомогательные функции для отладочного вывода
 void s21_print_decimal_bits(s21_decimal decimal) {
   printf("bits[0]: 0x%08x\n", decimal.bits[0]);

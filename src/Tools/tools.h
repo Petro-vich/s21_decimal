@@ -18,4 +18,9 @@ void set_scale(s21_decimal *num, int scale);
 void zero_decimal(s21_decimal *num);
 void add(s21_decimal a, s21_decimal b, s21_decimal *result);
 int is_overflow (s21_decimal *num);
+void shift_left(s21_decimal *num, int shift);
+int compare(s21_decimal value_1, s21_decimal value_2);
+
+
+
 #endif
