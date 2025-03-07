@@ -3,7 +3,7 @@
 
 #include "../s21_decimal.h"
 
-enum ERROR_CODES_AR { AR_OK, NUM_TOO_HIGH, NUM_TOO_SMALL, AR_NAN };
+enum ERROR_CODES_AR {AR_OK, NUM_TOO_HIGH, NUM_TOO_SMALL, AR_NAN };
 // 0 — OK;
 // 1 — число слишком велико или равно бесконечности;
 // 2 — число слишком мало или равно отрицательной бесконечности;
