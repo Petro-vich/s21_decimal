@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "s21_decimal.h": "c",
+        "math.h": "c",
+        "s21_convertors.h": "c",
+        "stddef.h": "c"
+    }
+}

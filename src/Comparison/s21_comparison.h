@@ -3,9 +3,13 @@
 
 #include "../s21_decimal.h"
 
-  int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result); // Addition	+	
-  int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result); // Subtraction	-	
-  int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result); // Multiplication	*	
-  int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result); // Division	/	
+enum ERROR_CODES_COMP { FALSE, TRUE };
 
-#endif S21_COMPARISON
+  int s21_is_less(s21_decimal, s21_decimal); // Less than	<	
+  int s21_is_less_or_equal(s21_decimal, s21_decimal); // Less than or equal to	<=	
+  int s21_is_greater(s21_decimal, s21_decimal); // Greater than	>	
+  int s21_is_greater_or_equal(s21_decimal, s21_decimal);// Greater than or equal to	>=	
+  int s21_is_equal(s21_decimal, s21_decimal); // Equal to	==	
+  int s21_is_not_equal(s21_decimal, s21_decimal); // Not equal to	!=	
+
+#endif 
