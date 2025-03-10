@@ -9,16 +9,15 @@ int s21_get_bit(s21_decimal decimal, int bit_position) {
   return (decimal.bits[byte_position] >> bit_offset) & 1;
 }
 int s21_set_bit(s21_decimal *decimal, int bit_position, int bit) {
-  int byte_position = bit_position / 32; 
-  int bit_offset = bit_position % 32;    
+  int byte_position = bit_position / 32;
+  int bit_offset = bit_position % 32;
 
   if (bit == 1)
-      decimal->bits[byte_position] |= (1 << bit_offset);
+    decimal->bits[byte_position] |= (1 << bit_offset);
   else
-      decimal->bits[byte_position] &= ~(1 << bit_offset);
+    decimal->bits[byte_position] &= ~(1 << bit_offset);
   return 0;
 }
-
 
 int s21_get_exp(s21_decimal decimal) {
   // 16-23  (bits[3])
@@ -41,6 +40,6 @@ int s21_bit_check(unsigned int num, unsigned int bit_num) {
 /*
 Функция, включает бит
 */
-int s21_bit_add(unsigned num, unsigned int bit_num) { 
-  return num | (1 << bit_num); 
+int s21_bit_add(unsigned num, unsigned int bit_num) {
+  return num | (1 << bit_num);
 }

@@ -245,56 +245,55 @@ START_TEST(test_from_decimal_to_float_fail) {
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_1) {
-    s21_decimal dec = { { 12345, 0, 0, 0 } };
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CNV_OK);
-    ck_assert_int_eq(result, 12345);
+  s21_decimal dec = {{12345, 0, 0, 0}};
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CNV_OK);
+  ck_assert_int_eq(result, 12345);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_2) {
-    s21_decimal dec = { { 12345, 0, 0, 0x00020000 } };  // scale = 2
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CNV_OK);
-    ck_assert_int_eq(result, 123);
+  s21_decimal dec = {{12345, 0, 0, 0x00020000}};  // scale = 2
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CNV_OK);
+  ck_assert_int_eq(result, 123);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_3) {
-    s21_decimal dec = { { 9876, 0, 0, 0x80000000 } };
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CNV_OK);
-    ck_assert_int_eq(result, -9876);
+  s21_decimal dec = {{9876, 0, 0, 0x80000000}};
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CNV_OK);
+  ck_assert_int_eq(result, -9876);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_4) {
-    s21_decimal dec = { { 9876, 0, 0, 0x80010000 } };  // scale = 1
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CNV_OK);
-    ck_assert_int_eq(result, -987);
+  s21_decimal dec = {{9876, 0, 0, 0x80010000}};  // scale = 1
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CNV_OK);
+  ck_assert_int_eq(result, -987);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_5) {
-    s21_decimal dec = { { 12345, 1, 0, 0 } };
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CONVERSION_ERROR);
+  s21_decimal dec = {{12345, 1, 0, 0}};
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_6) {
-    s21_decimal dec = { { 12345, 0, 0, 0 } };
-    int code = s21_from_decimal_to_int(dec, NULL);
-    ck_assert_int_eq(code, CONVERSION_ERROR);
+  s21_decimal dec = {{12345, 0, 0, 0}};
+  int code = s21_from_decimal_to_int(dec, NULL);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_s21_add_1) {
   s21_decimal a = {{1, 0, 0, 0}};
