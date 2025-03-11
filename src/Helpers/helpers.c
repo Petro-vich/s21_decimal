@@ -212,3 +212,14 @@ int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) 
   }
   return borrow ? 1 : 0;
 }
+
+int s21_from_decimal_to_double(s21_decimal src, long double *dst) {
+  long double temp = (double)*dst;
+  for (int i = 0; i < 96; i++) {
+    temp += s21_get_bit(src, i) * pow(2, i);
+  }
+  temp = temp * pow(10, -s21_get_exp(src));
+  if (s21_get_bit(src, 127)) temp = temp * (-1);
+  *dst = temp;
+  return 0;
+}
