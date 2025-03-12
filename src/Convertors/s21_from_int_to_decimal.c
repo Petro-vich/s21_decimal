@@ -13,7 +13,7 @@ int s21_from_int_to_decimal(int src, s21_decimal *dst){
         if (src != INT_MIN) {
         src = -src;  
     }
-    } 
-    dst->bits[0] = src;
-    return CNV_OK;
+  }
+  dst->bits[0] = src;
+  return CNV_OK;
 }

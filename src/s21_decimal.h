@@ -19,6 +19,7 @@ typedef struct
 #include "Arithmetic/s21_arithmetic.h"
 #include "Comparison/s21_comparison.h"
 #include "Convertors/s21_convertors.h"
-#include "Tools/tools.h"
+#include "Other_functions/s21_other_functions.h"
+#include "Helpers/helpers.h"
 
 #endif 
