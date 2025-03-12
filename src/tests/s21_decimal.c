@@ -317,125 +317,263 @@ START_TEST(test_s21_add_2) {
 }
 END_TEST
 
-// Тест 1: Округление положительного числа с дробной частью меньше 0.5
-START_TEST(test_s21_round_1) {
-  s21_decimal value = {{123456789, 0, 0, 0x00050000}}; // 1234.56789
-  s21_decimal result;
-  int code = s21_round(value, &result);
-
-  ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1234); // Ожидаемый результат: 1234
-  ck_assert_int_eq(result.bits[3], 0);    // Знак и масштаб должны быть 0
+START_TEST(test_s21_add_3) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
 }
 END_TEST
 
-// Тест 2: Округление положительного числа с дробной частью больше или равной 0.5
-START_TEST(test_s21_round_2) {
-  s21_decimal value = {{123456789, 0, 0, 0x00050000}}; // 1234.56789
+START_TEST(test_s21_add_4) {
+  s21_decimal val1 = {{8, 0, 0, 0}};
+  s21_decimal val2 = {{2, 0, 0, 0}};
+  s21_decimal res;
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_5) {
+  s21_decimal val1 = {{2, 0, 0, 0}};
+  s21_decimal val2 = {{8, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_6) {
+  s21_decimal val1 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{2, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_7) {
+  s21_decimal val1 = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{8, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_8) {
+  s21_decimal val1 = {{0}};
+  s21_decimal val2 = {{0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_9) {
+  s21_decimal val1 = {{4, 0, 0, 0}};
+  s21_decimal val2 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {0};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_10) {
+  s21_decimal val1 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_11) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{4, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_12) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_13) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal val2 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_14) {
+  s21_decimal val1 = {{4, 0, 0, 0}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_15) {
+  s21_decimal val1 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_16) {
+  s21_decimal val1 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_17) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_set_scale(&val1, 5);
+  s21_set_scale(&val2, 3);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(1, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_18) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_set_scale(&val1, 5);
+  s21_set_scale(&val2, 3);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+// Тест 1: Округление положительного числа с дробной частью меньше 0.5
+START_TEST(test_s21_round_1) {
+  s21_decimal value = {{123456789, 0, 0, 0x00050000}};  // 1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1235); // Ожидаемый результат: 1235
-  ck_assert_int_eq(result.bits[3], 0);    // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1234);  // Ожидаемый результат: 1234
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
+}
+END_TEST
+
+// Тест 2: Округление положительного числа с дробной частью больше или равной
+// 0.5
+START_TEST(test_s21_round_2) {
+  s21_decimal value = {{123456789, 0, 0, 0x00050000}};  // 1234.56789
+  s21_decimal result;
+  int code = s21_round(value, &result);
+
+  ck_assert_int_eq(code, 0);
+  ck_assert_int_eq(result.bits[0], 1235);  // Ожидаемый результат: 1235
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 3: Округление отрицательного числа с дробной частью меньше 0.5
 START_TEST(test_s21_round_3) {
-  s21_decimal value = {{123456789, 0, 0, 0x80050000}}; // -1234.56789
+  s21_decimal value = {{123456789, 0, 0, 0x80050000}};  // -1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1234); // Ожидаемый результат: -1234
-  ck_assert_int_eq(result.bits[3], 0x80000000); // Знак должен быть отрицательным
+  ck_assert_int_eq(result.bits[0], 1234);  // Ожидаемый результат: -1234
+  ck_assert_int_eq(result.bits[3],
+                   0x80000000);  // Знак должен быть отрицательным
 }
 END_TEST
 
-// Тест 4: Округление отрицательного числа с дробной частью больше или равной 0.5
+// Тест 4: Округление отрицательного числа с дробной частью больше или равной
+// 0.5
 START_TEST(test_s21_round_4) {
-  s21_decimal value = {{123456789, 0, 0, 0x80050000}}; // -1234.56789
+  s21_decimal value = {{123456789, 0, 0, 0x80050000}};  // -1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1235); // Ожидаемый результат: -1235
-  ck_assert_int_eq(result.bits[3], 0x80000000); // Знак должен быть отрицательным
+  ck_assert_int_eq(result.bits[0], 1235);  // Ожидаемый результат: -1235
+  ck_assert_int_eq(result.bits[3],
+                   0x80000000);  // Знак должен быть отрицательным
 }
 END_TEST
 
 // Тест 5: Округление числа с нулевой дробной частью
 START_TEST(test_s21_round_5) {
-  s21_decimal value = {{1234, 0, 0, 0x00020000}}; // 12.34
+  s21_decimal value = {{1234, 0, 0, 0x00020000}};  // 12.34
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 12); // Ожидаемый результат: 12
+  ck_assert_int_eq(result.bits[0], 12);  // Ожидаемый результат: 12
   ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 6: Округление числа с дробной частью, равной 0.5
 START_TEST(test_s21_round_6) {
-  s21_decimal value = {{5, 0, 0, 0x00010000}}; // 0.5
+  s21_decimal value = {{5, 0, 0, 0x00010000}};  // 0.5
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1); // Ожидаемый результат: 1
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1);  // Ожидаемый результат: 1
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 7: Округление числа с дробной частью, равной 0.499999
 START_TEST(test_s21_round_7) {
-  s21_decimal value = {{499999, 0, 0, 0x00060000}}; // 0.499999
+  s21_decimal value = {{499999, 0, 0, 0x00060000}};  // 0.499999
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0); // Ожидаемый результат: 0
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 0);  // Ожидаемый результат: 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 8: Округление числа с дробной частью, равной 0.500001
 START_TEST(test_s21_round_8) {
-  s21_decimal value = {{500001, 0, 0, 0x00060000}}; // 0.500001
+  s21_decimal value = {{500001, 0, 0, 0x00060000}};  // 0.500001
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1); // Ожидаемый результат: 1
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1);  // Ожидаемый результат: 1
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 9: Округление нуля
 START_TEST(test_s21_round_9) {
-  s21_decimal value = {{0, 0, 0, 0x00020000}}; // 0.00
+  s21_decimal value = {{0, 0, 0, 0x00020000}};  // 0.00
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0); // Ожидаемый результат: 0
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 0);  // Ожидаемый результат: 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 10: Округление числа с максимальным значением
 START_TEST(test_s21_round_10) {
-  s21_decimal value = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00010000}}; // Максимальное значение с масштабом 1
+  s21_decimal value = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                        0x00010000}};  // Максимальное значение с масштабом 1
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0xFFFFFFFF); // Ожидаемый результат: округление до целого
+  ck_assert_int_eq(result.bits[0],
+                   0xFFFFFFFF);  // Ожидаемый результат: округление до целого
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
@@ -1025,8 +1163,22 @@ Suite *decimal_suite(void) {
 
   tcase_add_test(tc_core, test_s21_add_1);
   tcase_add_test(tc_core, test_s21_add_2);
-  // tcase_add_test(tc_core, test_s21_add_3);
-  // tcase_add_test(tc_core, test_s21_add_4);
+  tcase_add_test(tc_core, test_s21_add_3);
+  tcase_add_test(tc_core, test_s21_add_4);
+  tcase_add_test(tc_core, test_s21_add_5);
+  tcase_add_test(tc_core, test_s21_add_6);
+  tcase_add_test(tc_core, test_s21_add_7);
+  tcase_add_test(tc_core, test_s21_add_8);
+  tcase_add_test(tc_core, test_s21_add_9);
+  tcase_add_test(tc_core, test_s21_add_10);
+  tcase_add_test(tc_core, test_s21_add_11);
+  tcase_add_test(tc_core, test_s21_add_12);
+  tcase_add_test(tc_core, test_s21_add_13);
+  tcase_add_test(tc_core, test_s21_add_14);
+  tcase_add_test(tc_core, test_s21_add_15);
+  tcase_add_test(tc_core, test_s21_add_16);
+  tcase_add_test(tc_core, test_s21_add_17);
+  tcase_add_test(tc_core, test_s21_add_18);
   tcase_add_test(tc_core, s21_round_1);
   tcase_add_test(tc_core, s21_round_2);
   tcase_add_test(tc_core, s21_round_3);
@@ -1053,7 +1205,6 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_roundTest13);
   tcase_add_test(tc_core, s21_roundTest14);
   tcase_add_test(tc_core, s21_roundTest15);
-  
 
   suite_add_tcase(s, tc_core);
 
