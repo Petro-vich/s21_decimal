@@ -8,6 +8,7 @@
     int s21_set_bit(s21_decimal *decimal, int bit_position, int bit);
     int s21_get_exp(s21_decimal decimal); 
     int s21_get_sign(s21_decimal decimal);
+    int s21_get_scale(s21_decimal decimal);
     void s21_set_sign(s21_decimal *num, int sign);
     void s21_set_scale(s21_decimal *num, int scale);
 
@@ -29,6 +30,7 @@
     void s21_zero_decimal(s21_decimal *num);
     int s21_is_zero(s21_decimal num);
     int s21_is_overflow(s21_decimal *num);
+    int s21_compare_abs(s21_decimal value_1, s21_decimal value_2);
 
 
     #endif

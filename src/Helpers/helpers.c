@@ -132,7 +132,9 @@ void s21_set_sign(s21_decimal *num, int sign) {
     num->bits[3] &= 0x7FFFFFFF; // Сбрасываем бит знака (0)
   }
 }
-
+int s21_get_scale(s21_decimal decimal) {
+  return (decimal.bits[3] >> 16) & 0xFF;
+}
 
 void s21_set_scale(s21_decimal *num, int scale) {
   num->bits[3] &= 0x80000000; // Сохраняем бит знака
@@ -196,6 +198,23 @@ int s21_compare(s21_decimal value_1, s21_decimal value_2) {
 
     return res;
 }
+
+int s21_compare_abs(s21_decimal value_1, s21_decimal value_2) {
+  // Приведение чисел к одному масштабу
+  s21_normalize_scales(&value_1, &value_2);
+
+  // Сравнение мантисс (игнорируя знаки)
+  for (int i = 2; i >= 0; --i) {
+      if (value_1.bits[i] < value_2.bits[i]) {
+          return -1;  // value_1 < value_2 по модулю
+      } else if (value_1.bits[i] > value_2.bits[i]) {
+          return 1;   // value_1 > value_2 по модулю
+      }
+  }
+
+  return 0; // Числа равны по модулю
+}
+
 
 int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   s21_zero_decimal(result);
