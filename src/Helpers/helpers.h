@@ -30,6 +30,6 @@
     int s21_is_zero(s21_decimal num);
     int s21_is_overflow(s21_decimal *num);
     int s21_from_decimal_to_double(s21_decimal src, long double *dst);
-
+    void s21_shift_right(s21_decimal *num, int shift);
 
     #endif

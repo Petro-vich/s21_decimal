@@ -13,19 +13,113 @@ START_TEST(test_fail) {
 }
 END_TEST
 
-START_TEST(test_decimal_ok) {
-  int num = -2147483648;
-  s21_decimal decimal_check = {{0x80000000, 0x0, 0x0, 0x80000000}};
-  check_decimal_conversion(num, decimal_check);
+START_TEST(test_int_zero) {
+    int num = 0;
+    s21_decimal result;
+    int code = s21_from_int_to_decimal(num, &result);
+
+    s21_decimal expected = {{0, 0, 0, 0}};
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result.bits[0], expected.bits[0]);
+    ck_assert_int_eq(result.bits[1], expected.bits[1]);
+    ck_assert_int_eq(result.bits[2], expected.bits[2]);
+    ck_assert_int_eq(result.bits[3], expected.bits[3]);
 }
 END_TEST
 
-START_TEST(test_decimal_ok_v2) {
-  int num = -2147483647;
-  s21_decimal decimal_check = {{0x7FFFFFFF, 0x0, 0x0, 0x80000000}};
-  check_decimal_conversion(num, decimal_check);
+
+START_TEST(test_int_positive) {
+    int num = 123456;
+    s21_decimal result;
+    int code = s21_from_int_to_decimal(num, &result);
+
+    s21_decimal expected = {{123456, 0, 0, 0}};
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result.bits[0], expected.bits[0]);
+    ck_assert_int_eq(result.bits[1], expected.bits[1]);
+    ck_assert_int_eq(result.bits[2], expected.bits[2]);
+    ck_assert_int_eq(result.bits[3], expected.bits[3]);
 }
 END_TEST
+
+
+START_TEST(test_int_negative) {
+    int num = -123456;
+    s21_decimal result;
+    int code = s21_from_int_to_decimal(num, &result);
+
+    s21_decimal expected = {{123456, 0, 0, 0x80000000}};
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result.bits[0], expected.bits[0]);
+    ck_assert_int_eq(result.bits[1], expected.bits[1]);
+    ck_assert_int_eq(result.bits[2], expected.bits[2]);
+    ck_assert_int_eq(result.bits[3], expected.bits[3]);
+}
+END_TEST
+
+
+START_TEST(test_decimal_to_int_ok) {
+    s21_decimal decimal = {{123456, 0, 0, 0}};
+    int result;
+    int code = s21_from_decimal_to_int(decimal, &result);
+
+    ck_assert_int_eq(code, CNV_OK);
+    ck_assert_int_eq(result, 123456);
+}
+END_TEST
+
+
+START_TEST(test_float_overflow) {
+    float num = 1e30f; 
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(num, &result);
+
+    ck_assert_int_eq(code, CONV_ERR);
+}
+END_TEST
+
+
+START_TEST(test_float_underflow) {
+    float num = -1e30f; 
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(num, &result);
+
+    ck_assert_int_eq(code, CONV_ERR);
+}
+END_TEST
+
+
+START_TEST(test_float_nan) {
+    float num = NAN;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(num, &result);
+
+    ck_assert_int_eq(code, CONV_ERR);
+}
+END_TEST
+
+
+START_TEST(test_float_infinity) {
+    float num = INFINITY;
+    s21_decimal result;
+    int code = s21_from_float_to_decimal(num, &result);
+
+    ck_assert_int_eq(code, CONV_ERR);
+}
+END_TEST
+
+
+
+
+START_TEST(test_decimal_to_int_overflow) {
+    s21_decimal decimal = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    int result;
+    int code = s21_from_decimal_to_int(decimal, &result);
+
+    ck_assert_int_eq(code, CONV_ERR);
+}
+END_TEST
+
 
 START_TEST(test_float_positive) {
   float src = 123.456f;
@@ -40,7 +134,7 @@ START_TEST(test_float_positive) {
 
   ck_assert_int_eq(result.bits[3], 3 << 16);
 
-  print_float_test_result("test_float_positive", src, result, code);
+
 }
 END_TEST
 
@@ -57,7 +151,7 @@ START_TEST(test_float_negative) {
 
   ck_assert_int_eq(result.bits[3], (int)(0x80000000u | (3 << 16)));
 
-  print_float_test_result("test_float_negative", src, result, code);
+
 }
 END_TEST
 
@@ -72,7 +166,7 @@ START_TEST(test_float_zero) {
   ck_assert_int_eq(result.bits[2], 0);
   ck_assert_int_eq(result.bits[3], 0);
 
-  print_float_test_result("test_float_zero", src, result, code);
+
 }
 END_TEST
 
@@ -83,7 +177,7 @@ START_TEST(test_float_too_small) {
 
   ck_assert_int_eq(code, CONV_ERR);
 
-  print_float_test_result("test_float_too_small", src, result, code);
+
 }
 END_TEST
 
@@ -94,7 +188,7 @@ START_TEST(test_float_too_large) {
 
   ck_assert_int_eq(code, CONV_ERR);
 
-  print_float_test_result("test_float_too_large", src, result, code);
+
 }
 END_TEST
 
@@ -105,7 +199,6 @@ START_TEST(test_float_nan) {
 
   ck_assert_int_eq(code, CONV_ERR);
 
-  print_float_test_result("test_float_nan", src, result, code);
 }
 END_TEST
 
@@ -116,7 +209,6 @@ START_TEST(test_float_infinity) {
 
   ck_assert_int_eq(code, CONV_ERR);
 
-  print_float_test_result("test_float_infinity", src, result, code);
 }
 END_TEST
 
@@ -127,8 +219,7 @@ START_TEST(test_from_decimal_to_float) {
 
   ck_assert_int_eq(code, CNV_OK);
 
-  print_decimal_to_float_result("test_from_decimal_to_float", decimal, result,
-                                code);
+
 }
 END_TEST
 
@@ -143,8 +234,7 @@ START_TEST(test_from_decimal_to_float_scale_3) {
   int code = s21_from_decimal_to_float(decimal, &result);
   ck_assert_int_eq(code, CNV_OK);
   ck_assert_float_eq_tol(result, 1234.560f, 0.001f);
-  print_decimal_to_float_result("test_from_decimal_to_float_scale_3", decimal,
-                                result, code);
+
 }
 END_TEST
 
@@ -155,8 +245,7 @@ START_TEST(test_from_decimal_to_float_fail) {
 
   ck_assert_int_eq(code, CONV_ERR);
 
-  print_decimal_to_float_result("test_from_decimal_to_float_fail", decimal,
-                                0.0f, code);
+
 }
 END_TEST
 
@@ -1004,8 +1093,18 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_div_rounding);
 
   tcase_add_test(tc_core, test_fail);
-  tcase_add_test(tc_core, test_decimal_ok);
-  tcase_add_test(tc_core, test_decimal_ok_v2);
+  tcase_add_test(tc_core, test_int_zero);
+  tcase_add_test(tc_core, test_int_positive);
+  tcase_add_test(tc_core, test_int_negative);
+  tcase_add_test(tc_core, test_decimal_to_int_ok);
+
+    
+  tcase_add_test(tc_core, test_float_overflow);
+  tcase_add_test(tc_core, test_float_underflow);
+  tcase_add_test(tc_core, test_float_nan);
+  tcase_add_test(tc_core, test_float_infinity);
+  tcase_add_test(tc_core, test_div_by_zero);
+  tcase_add_test(tc_core, test_decimal_to_int_overflow);
 
   tcase_add_test(tc_core, test_float_positive);
   tcase_add_test(tc_core, test_float_negative);

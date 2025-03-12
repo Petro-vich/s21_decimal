@@ -6,28 +6,28 @@ SRC_AR = $(wildcard Arithmetic/*.c)
 SRC_COMP = $(wildcard Comparison/*.c)
 SRC_CONV = $(wildcard Convertors/*.c)
 SRC_OTH = $(wildcard Other_functions/*.c)
-SRC_TOOLS = $(wildcard Tools/*.c)
+SRC_HELP = $(wildcard Helpers/*.c)
 
-ALL_SRC = $(SRC_COMP) $(SRC_CONV) $(SRC_OTH) $(SRC_TOOL) $(SRC_AR)
+ALL_SRC = $(SRC_COMP) $(SRC_CONV) $(SRC_OTH) $(SRC_HELP) $(SRC_AR)
 
 SRC_AR_OBJ = $(patsubst %.c, %.o, $(SRC_AR))
 SRC_COMP_OBJ = $(patsubst %.c, %.o, $(SRC_COMP))
 SRC_CONV_OBJ = $(patsubst %.c, %.o, $(SRC_CONV))
 SRC_OTH_OBJ = $(patsubst %.c, %.o, $(SRC_OTH))
-SRC_TOOL_OBJ = $(patsubst %.c, %.o, $(SRC_TOOLS))
+SRC_HELP_OBJ = $(patsubst %.c, %.o, $(SRC_HELP))
 
-ALL_SRC_OBJ = $(SRC_COMP_OBJ) $(SRC_CONV_OBJ) $(SRC_OTH_OBJ) $(SRC_TOOL_OBJ) $(SRC_AR_OBJ)
+ALL_SRC_OBJ = $(SRC_COMP_OBJ) $(SRC_CONV_OBJ) $(SRC_OTH_OBJ) $(SRC_HELP_OBJ) $(SRC_AR_OBJ)
 %.o: %.c
-	$(CC) -c $< -o $@ $(CFLAGS) 
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 all: s21_decimal.a
 
 s21_decimal.a: $(ALL_SRC_OBJ)
-	ar rcs $@ $(ALL_SRC_OBJ) 
+	ar rcs $@ $(ALL_SRC_OBJ)
 
 test: s21_decimal.a
-	$(CC) -D__DEBUG -o tests/test_decimal  tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
-	./tests/test_decimal 
+	$(CC) -D__DEBUG -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
+	./tests/test_decimal
 
 test_valgrind: s21_decimal.a
 	$(CC) -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
