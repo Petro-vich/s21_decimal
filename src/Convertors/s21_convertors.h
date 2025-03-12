@@ -3,7 +3,7 @@
 
 #include "../s21_decimal.h"
 
-enum ERROR_CODES_CNV { CNV_OK, CONVERSION_ERROR };
+enum ERROR_CODES_CNV { CNV_OK, CONV_ERR };
 // 0 — OK;
 // 1 — ошибка конвертации.
 

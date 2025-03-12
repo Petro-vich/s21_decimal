@@ -4,7 +4,7 @@
 
 int s21_from_decimal_to_float(s21_decimal src, float *dst) {  // В float
   if (!dst) {
-    return CONVERSION_ERROR;
+    return CONV_ERR;
   }
 
   double tmp = 0;

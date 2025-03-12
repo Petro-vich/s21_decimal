@@ -5,7 +5,7 @@
 
 
 int s21_from_float_to_decimal(float src, s21_decimal *dst) {
-    if (dst == NULL) return CONVERSION_ERROR;
+    if (dst == NULL) return CONV_ERR;
 
     // Очистка dst
     for (int i = 0; i < 4; i++) {
@@ -14,17 +14,17 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
 
     // Проверка на NaN(не число) и бесконечность
     if (isnan(src) || isinf(src)) {
-        return CONVERSION_ERROR;
+        return CONV_ERR;
     }
 
     // Проверка на слишком маленькие числа
     if (fabsf(src) < 1e-28 && src != 0.0f) {
-        return CONVERSION_ERROR;
+        return CONV_ERR;
     }
 
     // Проверка на слишком большие числа
     if (fabsf(src) > 79228162514264337593543950335.0f) {
-        return CONVERSION_ERROR;
+        return CONV_ERR;
     }
 
     // Обработка нуля

@@ -5,7 +5,7 @@
 
 int s21_from_int_to_decimal(int src, s21_decimal *dst){
     if (!dst) {
-        return CONVERSION_ERROR;
+        return CONV_ERR;
     }
     dst->bits[0] = dst->bits[1] = dst->bits[2] = dst->bits[3] = 0;
     if (src<0) {

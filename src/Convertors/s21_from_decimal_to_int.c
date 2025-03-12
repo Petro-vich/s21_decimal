@@ -2,11 +2,11 @@
 
 int s21_from_decimal_to_int(s21_decimal src, int *dst) {  // В int
   if (!dst) {
-      return CONVERSION_ERROR;
+      return CONV_ERR;
   }
   
   if (src.bits[1] != 0 || src.bits[2] != 0) {
-      return CONVERSION_ERROR;
+      return CONV_ERR;
   }
   
   int scale = (src.bits[3] >> 16) & 0xFF;
