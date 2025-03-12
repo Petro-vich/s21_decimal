@@ -2,6 +2,7 @@
 #define S21_OTHER_FUNCTIONS
 
 #include "../s21_decimal.h"
+#include "stddef.h"
 
 enum ERROR_CODES_OTH { OTH_OK, CALCULATION_ERROR };
 // 0 — OK;
