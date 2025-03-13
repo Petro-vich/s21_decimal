@@ -14,7 +14,7 @@
     // Функции работы с битами
     int s21_bit_check(unsigned int num, unsigned int bit_num);
     int s21_bit_add(unsigned num, unsigned bit_num);
-    void s21_shift_left(s21_decimal *num, int shift);
+    int s21_shift_left(s21_decimal *num, int shift);
 
     // Арифметические операции
     int s21_compare(s21_decimal value_1, s21_decimal value_2);
@@ -31,5 +31,4 @@
     int s21_is_overflow(s21_decimal *num);
     int s21_from_decimal_to_double(s21_decimal src, long double *dst);
     void s21_shift_right(s21_decimal *num, int shift);
-
-    #endif
+#endif

@@ -157,29 +157,29 @@ void s21_zero_decimal(s21_decimal *num) {
 
 }
 
-void s21_shift_left(s21_decimal *num, int shift) {
+int s21_shift_left(s21_decimal *num, int shift) {
+    int overflow = 0;
     for (int i = 0; i < shift; i++) {
-        // Перенос битов между блоками
         int carry_0 = (num->bits[0] & 0x80000000) ? 1 : 0; // Перенос из bits[0]
         int carry_1 = (num->bits[1] & 0x80000000) ? 1 : 0; // Перенос из bits[1]
+        int carry_2 = (num->bits[2] & 0x80000000) ? 1 : 0; // Перенос из bits[2]
 
-        // Сдвиг каждого блока влево на 1 бит
         num->bits[0] <<= 1;
         num->bits[1] <<= 1;
         num->bits[2] <<= 1;
 
-        // Учет переноса
-        if (carry_0) num->bits[1] |= 1; // Перенос из bits[0] в bits[1]
-        if (carry_1) num->bits[2] |= 1; // Перенос из bits[1] в bits[2]
+        if (carry_0) num->bits[1] |= 1;
+        if (carry_1) num->bits[2] |= 1;
+        if (carry_2) overflow = 1; // Бит вышел за пределы 96 бит
     }
+    return overflow;
 }
 
-int s21_is_overflow (s21_decimal *num){
+int s21_is_overflow(s21_decimal *num) {
   if (num->bits[2] > 0xFFFFFFFF || num->bits[1] > 0xFFFFFFFF || num->bits[0] > 0xFFFFFFFF) {
     return 1;
   }
   return 0;
-
 }
 
 int s21_compare(s21_decimal value_1, s21_decimal value_2) {
