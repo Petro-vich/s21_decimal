@@ -318,6 +318,68 @@ START_TEST(test_s21_add_2) {
 }
 END_TEST
 
+START_TEST(test_mul_positive) {
+    s21_decimal a = {{6, 0, 0, 0}};      
+    s21_decimal b = {{2, 0, 0, 0}};      
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 0);         
+    ck_assert_uint_eq(result.bits[0], 12); 
+}
+END_TEST
+
+START_TEST(test_mul_negative) {
+    s21_decimal a = {{6, 0, 0, 0x80000000}}; 
+    s21_decimal b = {{2, 0, 0, 0x80000000}}; 
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 0);              
+    ck_assert_uint_eq(result.bits[0], 12);    
+    ck_assert_uint_eq(result.bits[3], 0);     
+}
+END_TEST
+
+START_TEST(test_mul_mixed_sign) {
+    s21_decimal a = {{6, 0, 0, 0x80000000}}; 
+    s21_decimal b = {{2, 0, 0, 0}};         
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 0);
+    ck_assert_uint_eq(result.bits[0], 12);
+    ck_assert_int_eq(result.bits[3], (int)0x80000000); 
+}
+END_TEST
+
+START_TEST(test_mul_zero) {
+    s21_decimal a = {{6, 0, 0, 0}};     
+    s21_decimal b = {{0, 0, 0, 0}};   
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 0);       
+    ck_assert_uint_eq(result.bits[0], 0); 
+}
+END_TEST
+
+START_TEST(test_mul_scale) {
+    s21_decimal a = {{6, 0, 0, 0x00010000}}; 
+    s21_decimal b = {{2, 0, 0, 0x00010000}}; 
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 0);           
+    ck_assert_uint_eq(result.bits[0], 12);
+    ck_assert_uint_eq(result.bits[3], 0x00020000);
+}
+END_TEST
+
+START_TEST(test_mul_overflow) {
+    s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+    s21_decimal b = {{2, 0, 0, 0}}; 
+    s21_decimal result;
+    int status = s21_mul(a, b, &result);
+    ck_assert_int_eq(status, 1);     
+}
+END_TEST
+
 Suite *decimal_suite(void) {
   Suite *s;
   TCase *tc_core;
@@ -352,6 +414,15 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_s21_add_2);
   // tcase_add_test(tc_core, test_s21_add_3);
   // tcase_add_test(tc_core, test_s21_add_4);
+
+  tcase_add_test(tc_core, test_mul_positive);
+  tcase_add_test(tc_core, test_mul_negative);
+  tcase_add_test(tc_core, test_mul_mixed_sign);
+  tcase_add_test(tc_core, test_mul_zero);
+  tcase_add_test(tc_core, test_mul_scale);
+  tcase_add_test(tc_core, test_mul_overflow);
+  
+
 
   suite_add_tcase(s, tc_core);
 
