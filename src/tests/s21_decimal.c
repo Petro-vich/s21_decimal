@@ -70,7 +70,7 @@ END_TEST
 
 
 START_TEST(test_float_overflow) {
-    float num = 1e30f; 
+    float num = 1e30f;
     s21_decimal result;
     int code = s21_from_float_to_decimal(num, &result);
 
@@ -80,7 +80,7 @@ END_TEST
 
 
 START_TEST(test_float_underflow) {
-    float num = -1e30f; 
+    float num = -1e30f;
     s21_decimal result;
     int code = s21_from_float_to_decimal(num, &result);
 
@@ -192,25 +192,6 @@ START_TEST(test_float_too_large) {
 }
 END_TEST
 
-START_TEST(test_float_nan) {
-  float src = NAN;
-  s21_decimal result;
-  int code = s21_from_float_to_decimal(src, &result);
-
-  ck_assert_int_eq(code, CONV_ERR);
-
-}
-END_TEST
-
-START_TEST(test_float_infinity) {
-  float src = INFINITY;
-  s21_decimal result;
-  int code = s21_from_float_to_decimal(src, &result);
-
-  ck_assert_int_eq(code, CONV_ERR);
-
-}
-END_TEST
 
 START_TEST(test_from_decimal_to_float) {
   s21_decimal decimal = {{0x1234560, 0, 0, 0x80000000}};
@@ -348,11 +329,11 @@ START_TEST(test_div_fractional) {
     s21_decimal b = {{3, 0, 0, 0}};      // 3.0 (scale 0)
     s21_decimal result;
     s21_div(a, b, &result);
-    
+
     // Ожидаем 0.333... с масштабом 28
     ck_assert_int_eq(s21_get_exp(result), 28);
     // Проверяем первые биты дробной части
-    ck_assert(result.bits[0] > 0); 
+    ck_assert(result.bits[0] > 0);
 }
 END_TEST
 
@@ -376,7 +357,7 @@ START_TEST(test_div_rounding) {
     s21_decimal b = {{3, 0, 0, 0}};       // 3 (scale 0)
     s21_decimal result;
     s21_div(a, b, &result);
-    
+
     // Ожидаем 0.333... с масштабом 28
     ck_assert_int_eq(s21_get_exp(result), 28);
 }
@@ -1098,10 +1079,9 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_int_negative);
   tcase_add_test(tc_core, test_decimal_to_int_ok);
 
-    
+
   tcase_add_test(tc_core, test_float_overflow);
   tcase_add_test(tc_core, test_float_underflow);
-  tcase_add_test(tc_core, test_float_nan);
   tcase_add_test(tc_core, test_float_infinity);
   tcase_add_test(tc_core, test_div_by_zero);
   tcase_add_test(tc_core, test_decimal_to_int_overflow);
@@ -1112,7 +1092,6 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_float_too_small);
   tcase_add_test(tc_core, test_float_too_large);
   tcase_add_test(tc_core, test_float_nan);
-  tcase_add_test(tc_core, test_float_infinity);
 
   tcase_add_test(tc_core, test_from_decimal_to_float);
   tcase_add_test(tc_core, test_from_decimal_to_float_scale_3);
@@ -1155,7 +1134,7 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_roundTest13);
   tcase_add_test(tc_core, s21_roundTest14);
   tcase_add_test(tc_core, s21_roundTest15);
-  
+
 
   suite_add_tcase(s, tc_core);
 
@@ -1170,7 +1149,7 @@ int main() {
     sr = srunner_create(s);
 
     srunner_run_all(sr, CK_NORMAL);
-    
+
     srunner_free(sr);
     return 0;
 }
