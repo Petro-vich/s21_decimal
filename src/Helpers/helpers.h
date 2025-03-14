@@ -22,6 +22,8 @@
     int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
     void s21_divide_integer(s21_decimal dividend, s21_decimal divisor, s21_decimal *quotient, s21_decimal *remainder);
     void s21_multiply_by_10(s21_decimal *num);
+    int s21_add_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
+    int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
 
     // Вспомогательные функции
     s21_decimal s21_absoulute_decimal(s21_decimal num);
@@ -33,6 +35,7 @@
 
     int s21_compare_abs(s21_decimal value_1, s21_decimal value_2);
     int s21_from_decimal_to_double(s21_decimal src, long double *dst);
+    int s21_is_max_decimal(s21_decimal *num);
 
 
 
