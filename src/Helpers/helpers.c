@@ -131,6 +131,9 @@ void s21_set_sign(s21_decimal *num, int sign) {
     num->bits[3] &= 0x7FFFFFFF;  // Сбрасываем бит знака (0)
   }
 }
+int s21_get_scale(s21_decimal decimal) {
+  return (decimal.bits[3] >> 16) & 0xFF;
+}
 
 void s21_set_scale(s21_decimal *num, int scale) {
   num->bits[3] &= 0x80000000;     // Сохраняем бит знака
@@ -192,9 +195,24 @@ int s21_compare(s21_decimal value_1, s21_decimal value_2) {
 
   return res;
 }
+int s21_compare_abs(s21_decimal value_1, s21_decimal value_2) {
+  // Приведение чисел к одному масштабу
+  s21_normalize_scales(&value_1, &value_2);
 
-int s21_subtract(s21_decimal value_1, s21_decimal value_2,
-                 s21_decimal *result) {
+  // Сравнение мантисс (игнорируя знаки)
+  for (int i = 2; i >= 0; --i) {
+      if (value_1.bits[i] < value_2.bits[i]) {
+          return -1;  // value_1 < value_2 по модулю
+      } else if (value_1.bits[i] > value_2.bits[i]) {
+          return 1;   // value_1 > value_2 по модулю
+      }
+  }
+
+  return 0; // Числа равны по модулю
+}
+
+
+int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   s21_zero_decimal(result);
   int borrow = 0;
   for (int i = 0; i < 3; i++) {
@@ -208,6 +226,83 @@ int s21_subtract(s21_decimal value_1, s21_decimal value_2,
     result->bits[i] = (int)(diff & 0xFFFFFFFF);
   }
   return borrow ? 1 : 0;
+}
+
+
+int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+    if (!result) return AR_NAN;
+    
+    // Обнуляем результат
+    s21_zero_decimal(result);
+    int borrow = 0;
+    
+    // Обрабатываем 96 значащих битов (0..95)
+    for (int i = 0; i < 96; i++) {
+        int bit1 = s21_get_bit(value_1, i);
+        int bit2 = s21_get_bit(value_2, i);
+        int diff = bit1 - bit2 - borrow;
+        
+        if (diff < 0) {
+            diff += 2;  // Если получился отрицательный результат, прибавляем 2
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        
+        s21_set_bit(result, i, diff);
+    }
+    
+    // Если borrow != 0, значит вычитание привело к отрицательному результату (по модулю)
+    return borrow;
+    //ОСТОРОЖНО, ЭТА ФУНКЦИЯ МОЖЕТ ВЕРНУТЬ 1, ЕСЛИ VAL1 < VAL2 ПО МОДУЛЮ
+}
+
+
+int s21_add_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  // сложение модулей чисел
+  if (!result) return AR_NAN;
+  
+  // Обнуляем все биты результата
+  for (int i = 0; i < 4; i++) {
+      result->bits[i] = 0;
+  }
+
+  int carry = 0; // Перенос
+
+  // Поразрядное сложение (только для младших 96 бит, т.е. bits[0..2])
+  for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 32; j++) {
+          int bit_1 = s21_bit_check(value_1.bits[i], j);
+          int bit_2 = s21_bit_check(value_2.bits[i], j);
+          
+          // Вычисляем сумму бита с учетом переноса
+          int sum = bit_1 + bit_2 + carry;
+          
+          // Здесь мы вычисляем значение результирующего бита как (sum % 2)
+          if (sum % 2 == 1) {
+              // Функция s21_bit_add ожидает unsigned int и возвращает новое значение с установленным битом.
+              result->bits[i] = s21_bit_add(result->bits[i], j);
+          }
+          
+          // Вычисляем новый перенос как целую часть от деления суммы на 2.
+          carry = sum / 2;
+      }
+  }
+
+  if (carry) {
+    return carry;  // то есть 1
+  }
+
+  return AR_OK;
+}
+
+int s21_is_max_decimal(s21_decimal *num) {
+  // Максимальное значение представлено, когда все 96 бит мантиссы равны 1.
+  if (num->bits[0] == 0xFFFFFFFF &&
+      num->bits[1] == 0xFFFFFFFF &&
+      num->bits[2] == 0xFFFFFFFF) {
+    return 1;
+  }
+  return 0;
 }
 
 int s21_from_decimal_to_double(s21_decimal src, long double *dst) {

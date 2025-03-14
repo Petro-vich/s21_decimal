@@ -50,24 +50,6 @@ void check_decimal_conversion(int num, s21_decimal decimal_check) {
 #endif
 }
 
-void print_float_test_result(const char *test_name, float src,
-                             s21_decimal result, int code) {
-#if defined(__DEBUG)
-  printf("---------------------------------\n");
-  printf("Test: %s\n", test_name);
-  printf("Input float: %f\n", src);
-  if (code == 0) {
-    printf("Result:\n");
-    s21_print_decimal_bits(result);
-    s21_print_decimal_string(result);
-    printf("sign = %d\n", (result.bits[3] & 0x80000000) ? 1 : 0);
-  } else {
-    printf("Result: CONVERSION_ERROR\n");
-  }
-  printf("---------------------------------\n");
-#endif
-}
-
 void print_decimal_to_float_result(const char *test_name, s21_decimal src,
                                    float dst, int code) {
 #if defined(__DEBUG)
@@ -124,7 +106,6 @@ START_TEST(test_float_positive) {
 
   ck_assert_int_eq(result.bits[3], 3 << 16);
 
-  print_float_test_result("test_float_positive", src, result, code);
 }
 END_TEST
 
@@ -141,7 +122,6 @@ START_TEST(test_float_negative) {
 
   ck_assert_int_eq(result.bits[3], (int)(0x80000000u | (3 << 16)));
 
-  print_float_test_result("test_float_negative", src, result, code);
 }
 END_TEST
 
@@ -156,7 +136,6 @@ START_TEST(test_float_zero) {
   ck_assert_int_eq(result.bits[2], 0);
   ck_assert_int_eq(result.bits[3], 0);
 
-  print_float_test_result("test_float_zero", src, result, code);
 }
 END_TEST
 
@@ -167,7 +146,6 @@ START_TEST(test_float_too_small) {
 
   ck_assert_int_eq(code, CONVERSION_ERROR);
 
-  print_float_test_result("test_float_too_small", src, result, code);
 }
 END_TEST
 
@@ -178,7 +156,6 @@ START_TEST(test_float_too_large) {
 
   ck_assert_int_eq(code, CONVERSION_ERROR);
 
-  print_float_test_result("test_float_too_large", src, result, code);
 }
 END_TEST
 
@@ -189,7 +166,6 @@ START_TEST(test_float_nan) {
 
   ck_assert_int_eq(code, CONVERSION_ERROR);
 
-  print_float_test_result("test_float_nan", src, result, code);
 }
 END_TEST
 
@@ -200,7 +176,6 @@ START_TEST(test_float_infinity) {
 
   ck_assert_int_eq(code, CONVERSION_ERROR);
 
-  print_float_test_result("test_float_infinity", src, result, code);
 }
 END_TEST
 
@@ -1131,6 +1106,100 @@ START_TEST(s21_roundTest15) {
 }
 END_TEST
 
+// Тест 1: Обычное вычитание, результат положительный (5 - 3 = 2)
+START_TEST(test_s21_sub_1) {
+  s21_decimal a = {{5, 0, 0, 0}};
+  s21_decimal b = {{3, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq(result.bits[0], 2);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0);
+}
+END_TEST
+
+// Тест 2: Обычное вычитание, результат отрицательный (3 - 5 = -2)
+START_TEST(test_s21_sub_2) {
+  s21_decimal a = {{3, 0, 0, 0}};
+  s21_decimal b = {{5, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  // Результат по модулю 2
+  ck_assert_int_eq(result.bits[0], 2);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0x80000000);
+}
+END_TEST
+
+// Тест 3: Если второе число равно 0, результат должен быть равен первому числу.
+START_TEST(test_s21_sub_3) {
+  s21_decimal a = {{7, 0, 0, 0}};
+  s21_decimal b = {{0, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq(result.bits[0], 7);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3], 0);
+}
+END_TEST
+
+// Тест 4: Если первое число равно 0, результат должен быть равен -b.
+START_TEST(test_s21_sub_4) {
+  s21_decimal a = {{0, 0, 0, 0}};
+  s21_decimal b = {{9, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  // Ожидаем результат 9 с отрицательным знаком
+  ck_assert_int_eq(result.bits[0], 9);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0x80000000);
+}
+END_TEST
+
+// Тест 5: Вычитание чисел с разными масштабами
+// a = 10.50, b = 3.25, ожидаемый результат: 7.25.
+// Представляем a как 1050 и b как 325 с масштабом 2 (scale = 2 -> bits[3] = 2 << 16)
+START_TEST(test_s21_sub_5) {
+  s21_decimal a = {{1050, 0, 0, (2 << 16)}};
+  s21_decimal b = {{325, 0, 0, (2 << 16)}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  // 1050 - 325 = 725, при масштабе 2 означает 7.25
+  ck_assert_int_eq(result.bits[0], 725);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  // Проверяем, что масштаб равен 2: в bits[3] должны быть установлены биты в позициях 16-23, равные (2 << 16)
+  ck_assert_int_eq(result.bits[3] & 0x00FF0000, (2 << 16));
+  // Бит знака не должен быть установлен (число положительное)
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0);
+}
+END_TEST
+
+// Тест 6: Тест на переполнение (overflow).
+// Если a — максимально положительное число, а b отрицательное маленькое число,
+// то операция a - (-1) превращается в a + 1, что должно привести к переполнению.
+START_TEST(test_s21_sub_6) {
+  s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+  // Представляем -1 как число: модуль равен 1 и установлен бит знака в bits[3]
+  s21_decimal b = {{1, 0, 0, 0x80000000}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  // Ожидаем, что функция вернёт код переполнения (NUM_TOO_HIGH), так как a - (-1) = a + 1 выходит за пределы диапазона.
+  ck_assert_int_eq(code, NUM_TOO_HIGH);
+}
+END_TEST
+
+
 Suite *decimal_suite(void) {
   Suite *s;
   TCase *tc_core;
@@ -1205,6 +1274,12 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_roundTest13);
   tcase_add_test(tc_core, s21_roundTest14);
   tcase_add_test(tc_core, s21_roundTest15);
+  tcase_add_test(tc_core,test_s21_sub_1);
+  tcase_add_test(tc_core,test_s21_sub_2);
+  tcase_add_test(tc_core,test_s21_sub_3);
+  tcase_add_test(tc_core,test_s21_sub_4);
+  tcase_add_test(tc_core,test_s21_sub_5);
+  tcase_add_test(tc_core,test_s21_sub_6);
 
   suite_add_tcase(s, tc_core);
 
