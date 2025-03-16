@@ -18,10 +18,10 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     }
   
     // Получаем параметры (знак и масштаб) входных чисел
-    bool sign_1 = s21_get_sign(value_1);
-    bool sign_2 = s21_get_sign(value_2);
-    int scale_1 = s21_get_scale(value_1);
-    int scale_2 = s21_get_scale(value_2);
+    int sign_1 = s21_get_sign(value_1);
+    int sign_2 = s21_get_sign(value_2);
+    int scale_1 = s21_get_exp(value_1);
+    int scale_2 = s21_get_exp(value_2);
   
     // Нормализуем масштабы чисел, чтобы они имели одинаковое число цифр после запятой
     s21_normalize_scales(&value_1, &value_2);
@@ -33,7 +33,7 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
         // При этом важно: если по модулю value_1 >= value_2, то вычисляем value_1 - value_2,
         // иначе – value_2 - value_1, чтобы результат был положительным.
         if (s21_compare_abs(value_1, value_2) >= 0) {
-            error = s21_subtract_core(value_1, value_2, result);
+            error = s21_subtract_core(value_1, value_2, result); // с этого момента рофлы начинаются
             s21_set_sign(result, sign_1);
         } else {
             error = s21_subtract_core(value_2, value_1, result);

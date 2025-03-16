@@ -2,7 +2,6 @@
 #define S21_ARIFMETIC
 
 #include "../s21_decimal.h"
-#include <stdbool.h>
 
 enum ERROR_CODES_AR { AR_OK, NUM_TOO_HIGH, NUM_TOO_SMALL, AR_NAN };
 // 0 — OK;

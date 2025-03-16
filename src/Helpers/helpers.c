@@ -132,9 +132,6 @@ void s21_set_sign(s21_decimal *num, int sign) {
     num->bits[3] &= 0x7FFFFFFF; // Сбрасываем бит знака (0)
   }
 }
-int s21_get_scale(s21_decimal decimal) {
-  return (decimal.bits[3] >> 16) & 0xFF;
-}
 
 void s21_set_scale(s21_decimal *num, int scale) {
   num->bits[3] &= 0x80000000; // Сохраняем бит знака
