@@ -505,6 +505,117 @@ START_TEST(test_s21_round_10) {
 }
 END_TEST
 
+START_TEST(floor_positive_integer) {
+    s21_decimal val = {{123, 0, 0, 0}}; // 123
+    s21_decimal res;
+    s21_floor(val, &res);
+    s21_decimal expected = {{123, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Отрицательное целое
+START_TEST(floor_negative_integer) {
+    s21_decimal val = {{456, 0, 0, 0x80000000}}; // -456
+    s21_decimal res;
+    s21_floor(val, &res);
+    s21_decimal expected = {{456, 0, 0, 0x80000000}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Положительное с дробной частью
+START_TEST(floor_positive_fractional) {
+    s21_decimal val = {{123456, 0, 0, 0x50000}}; // 1.23456 (scale=5)
+    s21_decimal res;
+    s21_floor(val, &res);
+    s21_decimal expected = {{1, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Отрицательное с дробной частью
+START_TEST(floor_negative_fractional) {
+    s21_decimal val = {{999999, 0, 0, 0x80060000}}; // -0.999999 (scale=6)
+    s21_decimal res;
+    s21_floor(val, &res);
+    s21_decimal expected = {{1, 0, 0, 0x80000000}}; // -1
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Ноль
+START_TEST(floor_zero) {
+    s21_decimal val = {{0, 0, 0, 0x20000}}; // 0.00 (scale=2)
+    s21_decimal res;
+    s21_floor(val, &res);
+    s21_decimal expected = {{0, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+START_TEST(truncate_positive_integer) {
+    s21_decimal val = {{789, 0, 0, 0}}; // 789
+    s21_decimal res;
+    s21_truncate(val, &res);
+    s21_decimal expected = {{789, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Отрицательное целое
+START_TEST(truncate_negative_integer) {
+    s21_decimal val = {{987, 0, 0, 0x80000000}}; // -987
+    s21_decimal res;
+    s21_truncate(val, &res);
+    s21_decimal expected = {{987, 0, 0, 0x80000000}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Положительное с дробной частью
+START_TEST(truncate_positive_fractional) {
+    s21_decimal val = {{123456789, 0, 0, 0x80000}}; // 1234567.89 (scale=2)
+    s21_decimal res;
+    s21_truncate(val, &res);
+    s21_decimal expected = {{1234567, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+// Отрицательное с дробной частью
+START_TEST(truncate_negative_fractional) {
+    s21_decimal val = {{123456, 0, 0, 0x80030000}}; // -123.456 (scale=3)
+    s21_decimal res;
+    s21_truncate(val, &res);
+    s21_decimal expected = {{123, 0, 0, 0x80000000}}; // -123
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+START_TEST(floor_null_pointer) {
+    s21_decimal val = {{5, 0, 0, 0}};
+    ck_assert_int_eq(s21_floor(val, NULL), 1); // Ожидаем ошибку
+}
+END_TEST
+
+START_TEST(truncate_null_pointer) {
+    s21_decimal val = {{5, 0, 0, 0}};
+    ck_assert_int_eq(s21_truncate(val, NULL), 1); // Ожидаем ошибку
+}
+END_TEST
+
+// Максимальный масштаб (28)
+START_TEST(truncate_max_scale) {
+    s21_decimal val = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x1C0000}}; // max_num / 10^28
+    s21_decimal res;
+    s21_truncate(val, &res);
+    s21_decimal expected = {{0, 0, 0, 0}}; // 0 после усечения
+    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+}
+END_TEST
+
+
 START_TEST(s21_round_1) {
   s21_decimal dec1 = {0};
   dec1.bits[0] = 0b10010011111100000001110001010010;
@@ -1079,6 +1190,19 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_int_negative);
   tcase_add_test(tc_core, test_decimal_to_int_ok);
 
+  tcase_add_test(tc_core, floor_positive_integer);
+  tcase_add_test(tc_core, floor_negative_integer);
+  tcase_add_test(tc_core, floor_positive_fractional);
+  tcase_add_test(tc_core, floor_negative_fractional);
+  tcase_add_test(tc_core, floor_zero);
+  tcase_add_test(tc_core, floor_null_pointer);
+
+  tcase_add_test(tc_core, truncate_positive_integer);
+  tcase_add_test(tc_core, truncate_positive_fractional);
+  tcase_add_test(tc_core, truncate_negative_fractional);
+  tcase_add_test(tc_core, truncate_max_scale);
+  tcase_add_test(tc_core, truncate_null_pointer);
+  tcase_add_test(tc_core, truncate_negative_integer);
 
   tcase_add_test(tc_core, test_float_overflow);
   tcase_add_test(tc_core, test_float_underflow);

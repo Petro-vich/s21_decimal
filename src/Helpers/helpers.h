@@ -21,6 +21,8 @@
     int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result);
     void s21_divide_integer(s21_decimal dividend, s21_decimal divisor, s21_decimal *quotient, s21_decimal *remainder);
     void s21_multiply_by_10(s21_decimal *num);
+    void s21_div_10(s21_decimal *num);
+    int s21_if2_equal(s21_decimal a, s21_decimal b);
 
     // Вспомогательные функции
     s21_decimal s21_absoulute_decimal(s21_decimal num);

@@ -1,4 +1,6 @@
 #include "../s21_decimal.h"
+#include <stdint.h>
+
 
 int s21_get_bit(s21_decimal decimal, int bit_position) {
   int byte_position = bit_position / 32;
@@ -239,4 +241,15 @@ void s21_shift_right(s21_decimal *num, int shift) {
     }
 }
 
+void s21_div_10(s21_decimal *num) {
+    uint64_t temp = 0;
+    for (int i = 2; i >= 0; i--) {
+        temp = (temp << 32) + num->bits[i];
+        num->bits[i] = temp / 10;
+        temp %= 10;
+    }
+}
 
+int s21_if2_equal(s21_decimal a, s21_decimal b) {
+    return (s21_compare(a, b) == 0);
+}
