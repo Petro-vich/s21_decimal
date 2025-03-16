@@ -1036,43 +1036,55 @@ START_TEST(test_s21_sub_5) {
   s21_decimal result = {{0, 0, 0, 0}};
   int code = s21_sub(a, b, &result);
   ck_assert_int_eq(code, AR_OK);
-  // 1050 - 325 = 725, при масштабе 2 означает 7.25
   ck_assert_int_eq(result.bits[0], 725);
   ck_assert_int_eq(result.bits[1], 0);
   ck_assert_int_eq(result.bits[2], 0);
-  // Проверяем, что масштаб равен 2: в bits[3] должны быть установлены биты в позициях 16-23, равные (2 << 16)
   ck_assert_int_eq(result.bits[3] & 0x00FF0000, (2 << 16));
-  // Бит знака не должен быть установлен (число положительное)
   ck_assert_int_eq(result.bits[3] & 0x80000000, 0);
 }
 END_TEST
 
-// Тест 6: Тест на переполнение (overflow).
-// Если a — максимально положительное число, а b отрицательное маленькое число,
-// то операция a - (-1) превращается в a + 1, что должно привести к переполнению.
 START_TEST(test_s21_sub_6) {
   s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
-  // Представляем -1 как число: модуль равен 1 и установлен бит знака в bits[3]
   s21_decimal b = {{1, 0, 0, 0x80000000}};
   s21_decimal result = {{0, 0, 0, 0}};
   int code = s21_sub(a, b, &result);
-  // Ожидаем, что функция вернёт код переполнения (NUM_TOO_HIGH), так как a - (-1) = a + 1 выходит за пределы диапазона.
   ck_assert_int_eq(code, NUM_TOO_HIGH);
 }
 END_TEST
 
 START_TEST(test_s21_sub_7) {
-  s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};  // Максимальное значение без знака
-  s21_decimal b = {{1, 0, 0, 0}};  // Вычитаем 1
-  s21_decimal result = {{0, 0, 0, 0}};
-  int code = s21_sub(a, b, &result);
-  ck_assert_int_eq(code, AR_OK);
-  ck_assert_int_eq(result.bits[0], 0xFFFFFFFE);
-  ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3] & 0x80000000, 0);  // Положительное число
+    s21_decimal a = {{1, 1, 0, 0}};  // bits[0] = 1, bits[1] = 1, bits[2] = 0, bits[3] = 0
+    s21_decimal b = {{2, 0, 0, 0}};  // bits[0] = 2, остальные биты = 0
+    s21_decimal result = {{0, 0, 0, 0}};
+    int code = s21_sub(a, b, &result);
+
+    ck_assert_int_eq(code, AR_OK);
+    ck_assert_int_eq((uint32_t)result.bits[0], 0xFFFFFFFF);  // Ожидаемое значение: 4294967295
+    ck_assert_uint_eq(result.bits[1], 0);          // Старшие биты должны быть нулевыми
+    ck_assert_uint_eq(result.bits[2], 0);          // Старшие биты должны быть нулевыми
+    ck_assert_uint_eq(result.bits[3] & 0x80000000, 0);  // Положительное число (знаковый бит не установлен)
 }
 END_TEST
+
+START_TEST(test_s21_sub_8) {
+    s21_decimal max_decimal = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};  // Максимально возможное число
+    s21_decimal two = {{2, 0, 0, 0}};  // Число 2
+    s21_decimal result = {{0, 0, 0, 0}};
+
+    int code = s21_sub(max_decimal, two, &result);
+
+    printf("Result.bits: [0]=%u [1]=%X [2]=%X [3]=%X\n",
+           result.bits[0], result.bits[1], result.bits[2], result.bits[3]);
+    // Ожидаемый результат: max_decimal - 2 = 0xFFFFFFFD_FFFFFFFF_FFFFFFFF
+    ck_assert_int_eq(code, AR_OK);
+    ck_assert_int_eq((uint32_t)result.bits[0], 0xFFFFFFFD);
+    ck_assert_uint_eq(result.bits[1], 0xFFFFFFFF);
+    ck_assert_uint_eq(result.bits[2], 0xFFFFFFFF);
+    ck_assert_uint_eq(result.bits[3] & 0x80000000, 0);  // Проверяем, что число положительное
+}
+END_TEST
+
 
 Suite *decimal_suite(void) {
   Suite *s;
@@ -1142,7 +1154,7 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core,test_s21_sub_5);
   tcase_add_test(tc_core,test_s21_sub_6);
   tcase_add_test(tc_core,test_s21_sub_7);
-  //tcase_add_test(tc_core,test_s21_sub_8);
+  tcase_add_test(tc_core,test_s21_sub_8);
   //tcase_add_test(tc_core,test_s21_sub_9);
   //tcase_add_test(tc_core,test_s21_sub_10);
   

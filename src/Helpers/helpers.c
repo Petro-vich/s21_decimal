@@ -229,7 +229,6 @@ int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) 
   return borrow ? 1 : 0;
 }
 
-
 int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
   if (!result) return AR_NAN;
 
@@ -248,8 +247,6 @@ int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *res
       int bit1 = s21_get_bit(value_1, i);
       int bit2 = s21_get_bit(value_2, i);
       int diff = bit1 - bit2 - borrow;
-
-      printf("bit %d: bit1 = %d, bit2 = %d, borrow = %d, diff = %d\n", i, bit1, bit2, borrow, diff);
       
       if (diff < 0) {
           diff += 2;
