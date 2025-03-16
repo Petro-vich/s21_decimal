@@ -231,32 +231,39 @@ int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) 
 
 
 int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    if (!result) return AR_NAN;
-    
-    // Обнуляем результат
-    s21_zero_decimal(result);
-    int borrow = 0;
-    
-    // Обрабатываем 96 значащих битов (0..95)
-    for (int i = 0; i < 96; i++) {
-        int bit1 = s21_get_bit(value_1, i);
-        int bit2 = s21_get_bit(value_2, i);
-        int diff = bit1 - bit2 - borrow;
-        
-        if (diff < 0) {
-            diff += 2;  // Если получился отрицательный результат, прибавляем 2
-            borrow = 1;
-        } else {
-            borrow = 0;
-        }
-        
-        s21_set_bit(result, i, diff);
-    }
-    
-    // Если borrow != 0, значит вычитание привело к отрицательному результату (по модулю)
-    return borrow;
-    //ОСТОРОЖНО, ЭТА ФУНКЦИЯ МОЖЕТ ВЕРНУТЬ 1, ЕСЛИ VAL1 < VAL2 ПО МОДУЛЮ
+  if (!result) return AR_NAN;
+
+  s21_zero_decimal(result);
+
+  // Проверяем, какое число больше по модулю
+  if (s21_compare_abs(value_1, value_2) < 0) {
+      s21_decimal temp = value_1;
+      value_1 = value_2;
+      value_2 = temp;
+  }
+
+  int borrow = 0;
+
+  for (int i = 0; i < 96; i++) {
+      int bit1 = s21_get_bit(value_1, i);
+      int bit2 = s21_get_bit(value_2, i);
+      int diff = bit1 - bit2 - borrow;
+
+      printf("bit %d: bit1 = %d, bit2 = %d, borrow = %d, diff = %d\n", i, bit1, bit2, borrow, diff);
+      
+      if (diff < 0) {
+          diff += 2;
+          borrow = 1;
+      } else {
+          borrow = 0;
+      }
+
+      s21_set_bit(result, i, diff);
+  }
+
+  return AR_OK; 
 }
+
 
 
 int s21_add_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  // сложение модулей чисел
