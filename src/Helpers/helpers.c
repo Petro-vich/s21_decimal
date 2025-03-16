@@ -73,7 +73,7 @@ void s21_divide_integer(s21_decimal dividend, s21_decimal divisor, s21_decimal *
         int shift = 0;
 
         // Бинарный поиск: находим максимальный сдвиг
-        while (s21_compare(shifted_divisor, *remainder) <= 0 && !(shifted_divisor.bits[2] & 0x80000000)) {
+        while (s21_compare(shifted_divisor, *remainder) <= 0 && shift < 95) { // Добавлено условие shift < 95
             s21_shift_left(&shifted_divisor, 1);
             shift++;
         }
@@ -183,26 +183,21 @@ int s21_is_overflow (s21_decimal *num){
 }
 
 int s21_compare(s21_decimal value_1, s21_decimal value_2) {
-    // Приведение чисел к одному масштабу
     s21_normalize_scales(&value_1, &value_2);
     int res = 0;
-    // Сравнение знаков
     int sign1 = s21_get_sign(value_1);
     int sign2 = s21_get_sign(value_2);
 
     if (sign1 != sign2) {
-        res = (sign1 == 1) ? -1 : 1;
+        return (sign1) ? -1 : 1;
     }
 
-    // Сравнение мантисс
-    for (int i = 2; i >= 0 || res != 0; --i) {
-        if (value_1.bits[i] < value_2.bits[i]) {
-            res = (sign1 == 1) ? 1 : -1;
-        } else if (value_1.bits[i] > value_2.bits[i]) {
-            res = (sign1 == 1) ? -1 : 1;
+    for (int i = 2; i >= 0 && res == 0; --i) { // Исправлено условие
+        if (value_1.bits[i] != value_2.bits[i]) {
+            res = (value_1.bits[i] < value_2.bits[i]) ? -1 : 1;
+            res *= (sign1) ? -1 : 1;
         }
     }
-
     return res;
 }
 

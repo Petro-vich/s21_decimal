@@ -28,7 +28,8 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     s21_normalize_scales(&abs_1, &abs_2);
 
-    s21_decimal quotient, remainder;
+    s21_decimal quotient = {0};
+    s21_decimal remainder = {0};
     s21_divide_integer(abs_1, abs_2, &quotient, &remainder);
 
     s21_decimal fractional = {0};
@@ -36,7 +37,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     while (!s21_is_zero(remainder) && scale < 28) {
         s21_multiply_by_10(&remainder);
-        s21_decimal temp;
+        s21_decimal temp = {0};
         s21_divide_integer(remainder, abs_2, &temp, &remainder);
         s21_add(fractional, temp, &fractional);
         scale++;
@@ -67,7 +68,7 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     s21_combine_parts(quotient, fractional, scale, result);
 
     if (s21_is_overflow(result)) {
-        return (result_sign) ? NUM_TOO_SMALL : NUM_TOO_HIGH;
+        return result_sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
     }
 
     s21_set_sign(result, result_sign); // Устанавливаем знак результата
