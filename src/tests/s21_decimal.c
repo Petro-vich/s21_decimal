@@ -1060,7 +1060,7 @@ START_TEST(test_s21_sub_7) {
     int code = s21_sub(a, b, &result);
 
     ck_assert_int_eq(code, AR_OK);
-    ck_assert_int_eq((uint32_t)result.bits[0], 0xFFFFFFFF);  // Ожидаемое значение: 4294967295
+    ck_assert_int_eq((uint32_t)result.bits[0], (uint32_t)0xFFFFFFFF);  // Ожидаемое значение: 4294967295
     ck_assert_uint_eq(result.bits[1], 0);          // Старшие биты должны быть нулевыми
     ck_assert_uint_eq(result.bits[2], 0);          // Старшие биты должны быть нулевыми
     ck_assert_uint_eq(result.bits[3] & 0x80000000, 0);  // Положительное число (знаковый бит не установлен)
@@ -1074,14 +1074,12 @@ START_TEST(test_s21_sub_8) {
 
     int code = s21_sub(max_decimal, two, &result);
 
-    printf("Result.bits: [0]=%u [1]=%X [2]=%X [3]=%X\n",
-           result.bits[0], result.bits[1], result.bits[2], result.bits[3]);
     // Ожидаемый результат: max_decimal - 2 = 0xFFFFFFFD_FFFFFFFF_FFFFFFFF
     ck_assert_int_eq(code, AR_OK);
-    ck_assert_int_eq((uint32_t)result.bits[0], 0xFFFFFFFD);
-    ck_assert_uint_eq(result.bits[1], 0xFFFFFFFF);
-    ck_assert_uint_eq(result.bits[2], 0xFFFFFFFF);
-    ck_assert_uint_eq(result.bits[3] & 0x80000000, 0);  // Проверяем, что число положительное
+    ck_assert_int_eq((uint32_t)result.bits[0], (uint32_t)0xFFFFFFFD);
+    ck_assert_uint_eq((uint32_t)result.bits[1], (uint32_t)0xFFFFFFFF);
+    ck_assert_uint_eq((uint32_t)result.bits[2], (uint32_t)0xFFFFFFFF);
+    ck_assert_uint_eq((uint32_t)result.bits[3] & 0x80000000, (uint32_t)0);  // Проверяем, что число положительное
 }
 END_TEST
 
@@ -1155,8 +1153,7 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core,test_s21_sub_6);
   tcase_add_test(tc_core,test_s21_sub_7);
   tcase_add_test(tc_core,test_s21_sub_8);
-  //tcase_add_test(tc_core,test_s21_sub_9);
-  //tcase_add_test(tc_core,test_s21_sub_10);
+
   
 
   suite_add_tcase(s, tc_core);
