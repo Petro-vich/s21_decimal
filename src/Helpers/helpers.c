@@ -2,6 +2,7 @@
 
 #include "../s21_decimal.h"
 
+
 int s21_get_bit(s21_decimal decimal, int bit_position) {
   int byte_position = bit_position / 32;
   int bit_offset = bit_position % 32;
@@ -131,9 +132,6 @@ void s21_set_sign(s21_decimal *num, int sign) {
     num->bits[3] &= 0x7FFFFFFF;  // Сбрасываем бит знака (0)
   }
 }
-int s21_get_scale(s21_decimal decimal) {
-  return (decimal.bits[3] >> 16) & 0xFF;
-}
 
 void s21_set_scale(s21_decimal *num, int scale) {
   num->bits[3] &= 0x80000000;     // Сохраняем бит знака
@@ -201,9 +199,9 @@ int s21_compare_abs(s21_decimal value_1, s21_decimal value_2) {
 
   // Сравнение мантисс (игнорируя знаки)
   for (int i = 2; i >= 0; --i) {
-      if (value_1.bits[i] < value_2.bits[i]) {
+      if ((uint32_t)value_1.bits[i] < (uint32_t)value_2.bits[i]) {
           return -1;  // value_1 < value_2 по модулю
-      } else if (value_1.bits[i] > value_2.bits[i]) {
+      } else if ((uint32_t)value_1.bits[i] > (uint32_t)value_2.bits[i]) {
           return 1;   // value_1 > value_2 по модулю
       }
   }
@@ -228,34 +226,36 @@ int s21_subtract(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) 
   return borrow ? 1 : 0;
 }
 
-
 int s21_subtract_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    if (!result) return AR_NAN;
-    
-    // Обнуляем результат
-    s21_zero_decimal(result);
-    int borrow = 0;
-    
-    // Обрабатываем 96 значащих битов (0..95)
-    for (int i = 0; i < 96; i++) {
-        int bit1 = s21_get_bit(value_1, i);
-        int bit2 = s21_get_bit(value_2, i);
-        int diff = bit1 - bit2 - borrow;
-        
-        if (diff < 0) {
-            diff += 2;  // Если получился отрицательный результат, прибавляем 2
-            borrow = 1;
-        } else {
-            borrow = 0;
-        }
-        
-        s21_set_bit(result, i, diff);
-    }
-    
-    // Если borrow != 0, значит вычитание привело к отрицательному результату (по модулю)
-    return borrow;
-    //ОСТОРОЖНО, ЭТА ФУНКЦИЯ МОЖЕТ ВЕРНУТЬ 1, ЕСЛИ VAL1 < VAL2 ПО МОДУЛЮ
+  if (!result) return AR_NAN;
+
+  s21_zero_decimal(result);
+  if (s21_compare_abs(value_1, value_2) < 0) {
+    s21_decimal temp = value_1;
+      value_1 = value_2;
+      value_2 = temp;
+  }
+
+  int borrow = 0;
+
+  for (int i = 0; i < 96; i++) {
+      int bit1 = s21_get_bit(value_1, i);
+      int bit2 = s21_get_bit(value_2, i);
+      int diff = bit1 - bit2 - borrow;
+      
+      if (diff < 0) {
+          diff += 2;
+          borrow = 1;
+      } else {
+          borrow = 0;
+      }
+
+      s21_set_bit(result, i, diff);
+  }
+
+  return AR_OK; 
 }
+
 
 
 int s21_add_core(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {  // сложение модулей чисел
