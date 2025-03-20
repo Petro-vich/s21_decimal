@@ -2,7 +2,7 @@
     #define HELPERS
 
     #include "../s21_decimal.h"
-        
+    #include <stdint.h>
     // Геттеры и сеттеры
     int s21_get_bit(s21_decimal decimal, int bit_position);
     int s21_set_bit(s21_decimal *decimal, int bit_position, int bit);
