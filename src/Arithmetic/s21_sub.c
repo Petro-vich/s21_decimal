@@ -1,4 +1,5 @@
 #include "s21_arithmetic.h"
+#include "stdio.h"
 
 int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (!result) return AR_NAN;
@@ -18,8 +19,9 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     int sign_2 = s21_get_sign(value_2);
     int scale_1 = s21_get_exp(value_1);
     int scale_2 = s21_get_exp(value_2);
-
+ 
     s21_normalize_scales(&value_1, &value_2);
+
     int res_scale = (scale_1 > scale_2) ? scale_1 : scale_2;
 
     int error = AR_OK;
@@ -27,7 +29,6 @@ int s21_sub(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (sign_1 == sign_2) {
         s21_subtract_core(value_1, value_2, result);
 
-        // Устанавливаем знак результата
         if (s21_compare_abs(value_1, value_2) < 0) {
             s21_set_sign(result, !sign_1);
         } else {
