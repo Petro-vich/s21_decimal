@@ -18,16 +18,16 @@ SRC_HELP_OBJ = $(patsubst %.c, %.o, $(SRC_HELP))
 
 ALL_SRC_OBJ = $(SRC_COMP_OBJ) $(SRC_CONV_OBJ) $(SRC_OTH_OBJ) $(SRC_HELP_OBJ) $(SRC_AR_OBJ)
 %.o: %.c
-	$(CC) -c $< -o $@ $(CFLAGS)
+	$(CC) -c $< -o $@ $(CFLAGS) 
 
 all: s21_decimal.a
 
 s21_decimal.a: $(ALL_SRC_OBJ)
-	ar rcs $@ $(ALL_SRC_OBJ)
+	ar rcs $@ $(ALL_SRC_OBJ) 
 
 test: s21_decimal.a
 	$(CC) -D__DEBUG -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)
-	./tests/test_decimal
+	./tests/test_decimal 
 
 test_valgrind: s21_decimal.a
 	$(CC) -o tests/test_decimal tests/s21_decimal.c -L -l s21_decimal.a $(LDFLAGS)

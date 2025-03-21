@@ -1,7 +1,8 @@
 #ifndef S21_DECIMAL
 #define S21_DECIMAL
-
+#include <limits.h>
 #include <math.h>
+
 
 typedef struct 
 {

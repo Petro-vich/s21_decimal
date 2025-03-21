@@ -1,8 +1,9 @@
 #include "../s21_decimal.h"
-
+#include <limits.h>
 #include <check.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define CONV_ERR 1
 // Вспомогательные функции для отладочного вывода
 
 START_TEST(test_fail) {
@@ -505,115 +506,233 @@ START_TEST(test_s21_round_10) {
 }
 END_TEST
 
-START_TEST(floor_positive_integer) {
-    s21_decimal val = {{123, 0, 0, 0}}; // 123
-    s21_decimal res;
-    s21_floor(val, &res);
-    s21_decimal expected = {{123, 0, 0, 0}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+void floor_test_function(float n, float accuracy) {
+  s21_decimal var1 = {0}, var2 = {0};
+  float value1 = 0, value2 = 0;
+  s21_from_float_to_decimal(n, &var1);
+  s21_floor(var1, &var2);
+  s21_from_decimal_to_float(var2, &value2);
+  value1 = floorf(n);
+  ck_assert_float_eq_tol(value1, value2, accuracy);
+}
+
+// Тест: s21_floor для целого положительного числа без дробной части
+START_TEST(floor_0) {
+  s21_decimal val = {{2, 0, 0, 0}};
+  s21_decimal res;
+  ck_assert_int_eq(0, s21_floor(val, &res));
 }
 END_TEST
 
-// Отрицательное целое
-START_TEST(floor_negative_integer) {
-    s21_decimal val = {{456, 0, 0, 0x80000000}}; // -456
-    s21_decimal res;
-    s21_floor(val, &res);
-    s21_decimal expected = {{456, 0, 0, 0x80000000}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+// Тест: s21_floor для отрицательного целого числа (бит знака установлен)
+START_TEST(floor_1) {
+  // Здесь значение представлено с отрицательным знаком: бит знака установлен в 3-м элементе
+  s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  s21_floor(val, &res);
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  ck_assert_float_eq(-2, fres);
 }
 END_TEST
 
-// Положительное с дробной частью
-START_TEST(floor_positive_fractional) {
-    s21_decimal val = {{123456, 0, 0, 0x50000}}; // 1.23456 (scale=5)
-    s21_decimal res;
-    s21_floor(val, &res);
-    s21_decimal expected = {{1, 0, 0, 0}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+// Тест: s21_floor для отрицательного числа с дробной частью
+START_TEST(floor_2) {
+  s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  s21_set_scale(&val, 5);
+  s21_floor(val, &res);
+
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+
+  ck_assert_float_eq(-1, fres);
 }
 END_TEST
 
-// Отрицательное с дробной частью
-START_TEST(floor_negative_fractional) {
-    s21_decimal val = {{999999, 0, 0, 0x80060000}}; // -0.999999 (scale=6)
-    s21_decimal res;
-    s21_floor(val, &res);
-    s21_decimal expected = {{1, 0, 0, 0x80000000}}; // -1
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+// Тест: s21_floor для положительного числа с дробной частью (округление вниз дает целую часть)
+START_TEST(floor_3) {
+  s21_decimal val = {{2, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  s21_set_scale(&val, 5);
+  s21_floor(val, &res);
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  ck_assert_float_eq(0, fres);
 }
 END_TEST
 
-// Ноль
-START_TEST(floor_zero) {
-    s21_decimal val = {{0, 0, 0, 0x20000}}; // 0.00 (scale=2)
-    s21_decimal res;
-    s21_floor(val, &res);
-    s21_decimal expected = {{0, 0, 0, 0}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+// Тест: s21_floor для числа с масштабом, где результат сравнивается с ожидаемым значением
+START_TEST(floor_5) {
+  s21_decimal value_1 = {{7444923, 0, 0, 0}};
+  s21_set_scale(&value_1, 5);
+  s21_decimal check = {{74, 0, 0, 0}};
+  s21_decimal result = {0};
+  int return_value = s21_floor(value_1, &result);
+  ck_assert_int_eq(s21_is_equal(result, check), 1);
+  ck_assert_int_eq(return_value, 0);
 }
 END_TEST
 
-START_TEST(truncate_positive_integer) {
-    s21_decimal val = {{789, 0, 0, 0}}; // 789
-    s21_decimal res;
-    s21_truncate(val, &res);
-    s21_decimal expected = {{789, 0, 0, 0}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+// Тест: s21_floor для отрицательного числа с масштабом
+START_TEST(floor_6) {
+  s21_decimal value_1 = {{7444923, 0, 0, 0}};
+  s21_set_scale(&value_1, 5);
+  s21_set_sign(&value_1, 1); // Устанавливаем знак минуса
+
+  s21_decimal check = {{75, 0, 0, 0}};
+  s21_set_sign(&check, 1); // Ожидаемое отрицательное число
+
+  s21_decimal result = {0};
+  int return_value = s21_floor(value_1, &result);
+
+  ck_assert_int_eq(s21_is_equal(result, check), 1);
+  ck_assert_int_eq(return_value, 0);
+}
+END_TEST
+START_TEST(truncate_0) {
+  s21_decimal val = {{7, 7, 7, 0}};
+  s21_decimal res;
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = 129127208515966861312.0;
+  ck_assert_float_eq(need, fres);
 }
 END_TEST
 
-// Отрицательное целое
-START_TEST(truncate_negative_integer) {
-    s21_decimal val = {{987, 0, 0, 0x80000000}}; // -987
-    s21_decimal res;
-    s21_truncate(val, &res);
-    s21_decimal expected = {{987, 0, 0, 0x80000000}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+START_TEST(truncate_1) {
+  s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = -2.0;
+  ck_assert_float_eq(need, fres);
 }
 END_TEST
 
-// Положительное с дробной частью
-START_TEST(truncate_positive_fractional) {
-    s21_decimal val = {{123456789, 0, 0, 0x80000}}; // 1234567.89 (scale=2)
-    s21_decimal res;
-    s21_truncate(val, &res);
-    s21_decimal expected = {{1234567, 0, 0, 0}};
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+START_TEST(truncate_2) {
+  s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = -2.0;
+  ck_assert_float_eq(need, fres);
 }
 END_TEST
 
-// Отрицательное с дробной частью
-START_TEST(truncate_negative_fractional) {
-    s21_decimal val = {{123456, 0, 0, 0x80030000}}; // -123.456 (scale=3)
-    s21_decimal res;
-    s21_truncate(val, &res);
-    s21_decimal expected = {{123, 0, 0, 0x80000000}}; // -123
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+START_TEST(truncate_3) {
+  s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  s21_set_scale(&val, 5);
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = -0.0;
+  ck_assert_float_eq(need, fres);
 }
 END_TEST
 
-START_TEST(floor_null_pointer) {
-    s21_decimal val = {{5, 0, 0, 0}};
-    ck_assert_int_eq(s21_floor(val, NULL), 1); // Ожидаем ошибку
+START_TEST(truncate_4) {
+  s21_decimal val = {{128, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  s21_set_scale(&val, 1);
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = 12;
+  ck_assert_float_eq(need, fres);
 }
 END_TEST
 
-START_TEST(truncate_null_pointer) {
-    s21_decimal val = {{5, 0, 0, 0}};
-    ck_assert_int_eq(s21_truncate(val, NULL), 1); // Ожидаем ошибку
+START_TEST(truncate_5) {
+  s21_decimal value_1 = {{35, 0, 0, 0}};
+  s21_decimal check = {{3, 0, 0, 0}};
+  s21_set_scale(&value_1, 1);
+  s21_truncate(value_1, &value_1);
+  ck_assert_int_eq(s21_is_equal(value_1, check), 1);
 }
 END_TEST
 
-// Максимальный масштаб (28)
-START_TEST(truncate_max_scale) {
-    s21_decimal val = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x1C0000}}; // max_num / 10^28
-    s21_decimal res;
-    s21_truncate(val, &res);
-    s21_decimal expected = {{0, 0, 0, 0}}; // 0 после усечения
-    ck_assert_int_eq(s21_is_equal(res, expected), 1);
+START_TEST(truncate_6) {
+  s21_decimal value_1 = {{123456, 0, 0, 0}};
+  s21_set_scale(&value_1, 3);
+  s21_set_sign(&value_1, 1);
+  s21_decimal check = {{123, 0, 0, 0}};
+  s21_set_sign(&check, 1);
+  s21_truncate(value_1, &value_1);
+  ck_assert_int_eq(s21_is_equal(value_1, check), 1);
 }
 END_TEST
+
+START_TEST(truncate_7) {
+  s21_decimal src1 = {0};
+  src1.bits[3] = 0x000A0000;
+  src1.bits[2] = 0x0;
+  src1.bits[1] = 0xFFFFFFFF;
+  src1.bits[0] = 0xFFFFFFFF;
+  s21_set_sign(&src1, 1); // Устанавливаем отрицательный знак
+  s21_decimal result = {0};
+  result.bits[3] = 0x0;
+  result.bits[2] = 0x0;
+  result.bits[1] = 0x0;
+  result.bits[0] = 0x6DF37F67;
+  s21_set_sign(&result, 1); // Устанавливаем отрицательный знак
+  s21_decimal res_od = {0};
+  s21_truncate(src1, &res_od);
+  ck_assert_float_eq(res_od.bits[0], result.bits[0]);
+  ck_assert_float_eq(res_od.bits[1], result.bits[1]);
+  ck_assert_float_eq(res_od.bits[2], result.bits[2]);
+  ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+}
+END_TEST
+
+START_TEST(truncate_8) {
+  s21_decimal src1 = {0};
+  src1.bits[0] = 0b00000000000000000000000001101101;
+  src1.bits[1] = 0b00000000000011000110010101011011;
+  src1.bits[2] = 0b00000000000000000011000000111001;
+  src1.bits[3] = 0b00000000000011100000000000000000;
+  s21_decimal result = {0};
+  result.bits[0] = 0b10000111101111000001011000011110;
+  result.bits[1] = 0b00000000000000000000000000000000;
+  result.bits[2] = 0b00000000000000000000000000000000;
+  result.bits[3] = 0b00000000000000000000000000000000;
+  s21_decimal res_od = {0};
+  s21_truncate(src1, &res_od);
+  ck_assert_float_eq(res_od.bits[0], result.bits[0]);
+  ck_assert_float_eq(res_od.bits[1], result.bits[1]);
+  ck_assert_float_eq(res_od.bits[2], result.bits[2]);
+  ck_assert_float_eq(res_od.bits[3], result.bits[3]);
+}
+END_TEST
+
+START_TEST(truncate_9) {
+  s21_decimal val = {{123456789, 0, 0, 0}};
+  s21_set_scale(&val, 2);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = 1234567;
+  ck_assert_float_eq(need, fres);
+}
+END_TEST
+
+START_TEST(truncate_10) {
+  s21_decimal val = {{123456789, 0, 0, ~(UINT_MAX / 2)}};
+  s21_set_scale(&val, 3);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_truncate(val, &res));
+  float fres = 0;
+  s21_from_decimal_to_float(res, &fres);
+  float need = -123456;
+  ck_assert_float_eq(need, fres);
+}
+END_TEST
+
 
 
 START_TEST(s21_round_1) {
@@ -1190,19 +1309,24 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_int_negative);
   tcase_add_test(tc_core, test_decimal_to_int_ok);
 
-  tcase_add_test(tc_core, floor_positive_integer);
-  tcase_add_test(tc_core, floor_negative_integer);
-  tcase_add_test(tc_core, floor_positive_fractional);
-  tcase_add_test(tc_core, floor_negative_fractional);
-  tcase_add_test(tc_core, floor_zero);
-  tcase_add_test(tc_core, floor_null_pointer);
+  tcase_add_test(tc_core, floor_0);
+  tcase_add_test(tc_core, floor_1);
+  tcase_add_test(tc_core, floor_2);
+  tcase_add_test(tc_core, floor_3);
+  tcase_add_test(tc_core, floor_5);
+  tcase_add_test(tc_core, floor_6);
 
-  tcase_add_test(tc_core, truncate_positive_integer);
-  tcase_add_test(tc_core, truncate_positive_fractional);
-  tcase_add_test(tc_core, truncate_negative_fractional);
-  tcase_add_test(tc_core, truncate_max_scale);
-  tcase_add_test(tc_core, truncate_null_pointer);
-  tcase_add_test(tc_core, truncate_negative_integer);
+  tcase_add_test(tc_core, truncate_0);
+  tcase_add_test(tc_core, truncate_1);
+  tcase_add_test(tc_core, truncate_2);
+  tcase_add_test(tc_core, truncate_3);
+  tcase_add_test(tc_core, truncate_4);
+  tcase_add_test(tc_core, truncate_5);
+  tcase_add_test(tc_core, truncate_6);
+  tcase_add_test(tc_core, truncate_7);
+  tcase_add_test(tc_core, truncate_8);
+  tcase_add_test(tc_core, truncate_9);
+  tcase_add_test(tc_core, truncate_10);
 
   tcase_add_test(tc_core, test_float_overflow);
   tcase_add_test(tc_core, test_float_underflow);

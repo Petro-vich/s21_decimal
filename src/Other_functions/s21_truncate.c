@@ -1,20 +1,39 @@
 #include "s21_other_functions.h"
+#define START_INFO 96  // Определение отсутствующей константы
 
 
 int s21_truncate(s21_decimal value, s21_decimal *result) {
-    if (!result) return 1; // Ошибка: некорректный указатель
-    
-    *result = value;
-    int scale = s21_get_exp(value);
-    
-    if (scale == 0) return 0; // Число уже целое
-    
-    // Убираем дробную часть делением на 10^scale
-    for (int i = 0; i < scale; i++) {
-        s21_div_10(result); // Делим мантиссу на 10
+    s21_zero_decimal(result);
+    long double fl_to_int = 0.0;
+
+    // Используем s21_get_exp вместо s21_get_scale
+    if (s21_get_exp(value)) {
+        s21_from_decimal_to_double(value, &fl_to_int);
+        fl_to_int = truncl(fl_to_int); // Усечение до целого
+
+        // Обработка отрицательных чисел
+        if (fl_to_int < 0.0) {
+            s21_set_sign(result, 1);
+            fl_to_int *= -1;
+        }
+
+        // Преобразование усечённого числа обратно в decimal
+        for (int i = 0; fl_to_int >= 1 && i < START_INFO; i++) {
+            long double remainder = fmodl(fl_to_int, 2);
+            s21_set_bit(result, i, (remainder > 0.0) ? 1 : 0);
+            fl_to_int = floorl(fl_to_int / 2);
+        }
+
+        s21_set_scale(result, 0); // Установка масштаба 0
+    } else {
+        // Если масштаб уже 0, копируем биты
+        for (int i = 0; i < 4; ++i) {
+            result->bits[i] = value.bits[i];
+        }
     }
-    
-    // Устанавливаем новый масштаб = 0
-    s21_set_scale(result, 0);
     return 0;
 }
+
+
+
+
