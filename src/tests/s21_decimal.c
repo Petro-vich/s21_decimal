@@ -1221,6 +1221,27 @@ START_TEST(test_s21_sub_8) {
 }
 END_TEST
 
+START_TEST(test_s21_negate_null_result) {
+  s21_decimal value = {{1, 0, 0, 0}};  
+  int code = s21_negate(value, NULL); 
+
+  ck_assert_int_eq(code, CALCULATION_ERROR);
+}
+END_TEST
+
+START_TEST(test_s21_negate_zero) {
+  s21_decimal value = {{0, 0, 0, 0}};  // Число 0
+  s21_decimal result = {{1, 1, 1, 1}}; // Заполняем случайными значениями, чтобы проверить изменение
+  int code = s21_negate(value, &result);
+
+  ck_assert_int_eq(code, OTH_OK);
+  ck_assert_uint_eq(result.bits[0], 0);
+  ck_assert_uint_eq(result.bits[1], 0);
+  ck_assert_uint_eq(result.bits[2], 0);
+  ck_assert_uint_eq(result.bits[3], 0);  // Знаковый бит тоже должен быть 0
+}
+END_TEST
+
 
 Suite *decimal_suite(void) {
   Suite *s;
@@ -1304,6 +1325,9 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core,test_s21_sub_6);
   tcase_add_test(tc_core,test_s21_sub_7);
   tcase_add_test(tc_core,test_s21_sub_8);
+  tcase_add_test(tc_core, test_s21_negate_null_result);
+  tcase_add_test(tc_core, test_s21_negate_zero);
+  
 
   suite_add_tcase(s, tc_core);
 
