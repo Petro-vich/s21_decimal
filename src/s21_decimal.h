@@ -3,12 +3,12 @@
 #include <limits.h>
 #include <math.h>
 
-
-typedef struct 
+typedef struct
 {
-  int bits[4];
+ int bits[4];
 
 } s21_decimal;
+
 
 typedef struct 
 {
