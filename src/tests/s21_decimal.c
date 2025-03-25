@@ -201,6 +201,145 @@ START_TEST(s21_from_decimal_to_int_6) {
 }
 END_TEST
 
+START_TEST(s21_from_decimal_to_int_7) {
+  s21_decimal value = {{144, 0, 0, 0}};
+  int result = 0;
+  int expected = 144;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_8) {
+  s21_decimal value = {{0, 0, 0, 0}};
+  int error = s21_from_decimal_to_int(value, NULL);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_9) {
+  s21_decimal value = {{INT_MAX, 0, 0, 1 << 31}};
+  int result = 0;
+  int expected = INT_MIN + 1;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_10) {
+  s21_decimal value = {{2147483649, 0, 0, 1 << 31}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_11) {
+  s21_decimal value = {{2147483648, 0, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_12) {
+  s21_decimal value = {{INT_MAX, 0, 0, 0}};
+  int result = 0;
+  int expected = INT_MAX;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_13) {
+  s21_decimal value = {{0, 5, 0, (1 << 31) | (1 << 16)}};
+  int result = 0;
+  int expected = INT_MIN;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_14) {
+  s21_decimal value = {{9999999, 0, 0, 2 << 16}};
+  int result = 0;
+  int expected = 99999;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_15) {
+  s21_decimal value = {{123124, 1, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_16) {
+  s21_decimal value = {{2147483648, 0, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_17) {
+  s21_decimal value = {{9999999, 0, 0, 7 << 16}};
+  int result = 0;
+  int expected = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_18) {
+  s21_decimal value = {{9999999, 0, 0, 29 << 16}};
+  int result = 0;
+  int expected = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_19) {
+  s21_decimal value = {{0, 1, 0, 1 << 16}};
+  int result = 0;
+  int expected = 429496729;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_20) {
+  s21_decimal value = {{0, 11, 0, 7 << 16}};
+  int result = 0;
+  int expected = 4724;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_21) {
+  s21_decimal value = {{123456789, 0, 0, (7 << 16) | (1 << 31)}};
+  int result = 0;
+  int expected = -12;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
 START_TEST(test_s21_add_1) {
   s21_decimal a = {{1, 0, 0, 0}};
   s21_decimal b = {{1, 0, 0, 0}};
@@ -1855,6 +1994,20 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_from_decimal_to_int_4);
   tcase_add_test(tc_core, s21_from_decimal_to_int_5);
   tcase_add_test(tc_core, s21_from_decimal_to_int_6);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_7);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_8);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_9);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_10);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_11);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_12);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_13);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_14);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_15);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_16);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_17);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_19);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_20);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_21);
 
   tcase_add_test(tc_core, test_s21_add_1);
   tcase_add_test(tc_core, test_s21_add_2);
