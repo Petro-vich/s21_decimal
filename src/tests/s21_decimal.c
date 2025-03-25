@@ -1657,6 +1657,134 @@ START_TEST(test_s21_negate_zero) {
 }
 END_TEST
 
+// mitsuese
+
+START_TEST(test_s21_is_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_1) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_greater(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_1) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_2) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_less(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_2) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_not_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_not_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_not_equal(a, b), TRUE);
+}
+END_TEST
+
 Suite *decimal_suite(void) {
   Suite *s;
   TCase *tc_core;
@@ -1784,6 +1912,31 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, test_s21_sub_8);
   tcase_add_test(tc_core, test_s21_negate_null_result);
   tcase_add_test(tc_core, test_s21_negate_zero);
+
+  // mitsuese
+    tcase_add_test(tc_core, test_s21_is_equal_1);
+    tcase_add_test(tc_core, test_s21_is_equal_2);
+    tcase_add_test(tc_core, test_s21_is_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_greater_1);
+    tcase_add_test(tc_core, test_s21_is_greater_2);
+    tcase_add_test(tc_core, test_s21_is_greater_3);
+
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_1);
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_2);
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_less_1);
+    tcase_add_test(tc_core, test_s21_is_less_2);
+    tcase_add_test(tc_core, test_s21_is_less_3);
+
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_1);
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_2);
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_not_equal_1);
+    tcase_add_test(tc_core, test_s21_is_not_equal_2);
+    tcase_add_test(tc_core, test_s21_is_not_equal_3);
 
   suite_add_tcase(s, tc_core);
 
