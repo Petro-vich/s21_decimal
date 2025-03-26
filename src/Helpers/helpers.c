@@ -341,3 +341,26 @@ int s21_power_of_ten(int scale, s21_decimal *result) {
   }
   return 0;
 }
+
+s21_big_decimal s21_shift_big(s21_big_decimal a, int value, char vector) {
+  unsigned memory = 0, tmp = 0;
+  while (value > 0) {
+    if (vector == 'L') {
+      for (int i = 0; i < 7; i++) {
+        tmp = a.bits[i];
+        a.bits[i] <<= (value > 31 ? 31 : value);
+        a.bits[i] |= memory;
+        memory = tmp >> (32 - (value > 31 ? 31 : value));
+      }
+    } else if (vector == 'R') {
+      for (int i = 6; i >= 0; i--) {
+        tmp = a.bits[i];
+        a.bits[i] >>= (value > 31 ? 31 : value);
+        a.bits[i] |= memory;
+        memory = tmp << (32 - (value > 31 ? 31 : value));
+      }
+    }
+    value -= 31;
+  }
+  return a;
+}

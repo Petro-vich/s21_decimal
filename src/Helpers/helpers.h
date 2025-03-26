@@ -39,5 +39,5 @@
 
     int s21_from_decimal_to_double(s21_decimal src, long double *dst);
     void s21_shift_right(s21_decimal *num, int shift);
-
+    s21_big_decimal s21_shift_big(s21_big_decimal a, int value, char vector);
     #endif
