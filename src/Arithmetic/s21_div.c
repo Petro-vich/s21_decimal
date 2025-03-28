@@ -1,167 +1,40 @@
 #include "s21_arithmetic.h"
-#include "./../Helpers/helpers.h"
-#include <stddef.h>
-
-
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-  if (result == NULL) {
-    return AR_NAN; // Error: null result pointer
+  if (result == NULL) return CALC_ERR; // Проверка указателя
+
+  s21_big_decimal dividend = s21_decimal_to_big(value_1);
+  s21_big_decimal divisor = s21_decimal_to_big(value_2);
+  s21_big_decimal quotient = {0};
+  int status = CALC_OK;
+
+  // Обработка деления на ноль
+  if (s21_big_is_zero(divisor)) {
+    return s21_big_is_zero(dividend) ? CALC_UNDEFINED : CALC_DIV_BY_ZERO;
   }
 
-  if (s21_is_zero(value_2)) {
-    return AR_NAN; // Error: division by zero
+  // Если делимое ноль — результат ноль
+  if (s21_big_is_zero(dividend)) {
+    s21_zero_decimal(result);
+    return CALC_OK;
   }
 
-  int scale1 = s21_get_exp(value_1);
-  int scale2 = s21_get_exp(value_2);
-
-  if (scale1 > 28 || scale2 > 28) {
-    return AR_NAN; // Error: invalid scale
+  // Выравнивание масштабов делимого и делителя
+  int scale = s21_align_scales(&dividend, &divisor);
+  if (scale > MAX_SCALE) { // MAX_SCALE = 28
+    return (s21_big_get_sign(dividend) ^ s21_big_get_sign(divisor))
+    ? CALC_NEG_INF : CALC_INF;
   }
 
-  // Determine result sign
-  int sign1 = s21_get_sign(value_1);
-  int sign2 = s21_get_sign(value_2);
-  int result_sign = sign1 ^ sign2;
+  // Основной процесс деления
+  status = s21_big_div(dividend, divisor, &quotient);
+  if (status != CALC_OK) return status;
 
-  // Get absolute values
-  s21_decimal abs_1 = s21_absoulute_decimal(value_1);
-  s21_decimal abs_2 = s21_absoulute_decimal(value_2);
+  // Установка итогового масштаба и знака
+  s21_big_set_scale(&quotient, scale);
+  s21_big_set_sign(&quotient, s21_big_get_sign(dividend) ^ s21_big_get_sign(divisor));
 
-  // Normalize scales (if needed)
-  s21_normalize_scales(&abs_1, &abs_2);
-
-  // Perform integer division
-  s21_decimal quotient = {0};
-  s21_decimal remainder = {0};
-  s21_divide_integer(abs_1, abs_2, &quotient, &remainder);
-
-  // Calculate fractional part
-  s21_decimal fractional = {0};
-  int scale = 0;
-
-  while (!s21_is_zero(remainder) && scale < 28) {
-    s21_multiply_by_10(&fractional); // Fix: Shift fractional left
-    s21_multiply_by_10(&remainder);
-    s21_decimal temp = {0};
-    s21_divide_integer(remainder, abs_2, &temp, &remainder);
-    s21_add(fractional, temp, &fractional);
-    scale++;
-  }
-
-  // Handle rounding if precision limit reached
-  if (scale == 28 && !s21_is_zero(remainder)) {
-    s21_decimal half_divisor;
-    s21_decimal two = {{2, 0, 0, 0}};
-    s21_divide_integer(abs_2, two, &half_divisor, &(s21_decimal){0});
-
-    if (s21_compare(remainder, half_divisor) > 0) {
-      s21_add(fractional, two, &fractional); // Round up
-    } else if (s21_compare(remainder, half_divisor) == 0) {
-      if (fractional.bits[0] & 1) {
-        s21_add(fractional, two, &fractional); // Round to even
-      }
-    }
-    // Check for overflow after rounding
-    if (s21_is_overflow(&fractional)) {
-      scale--;
-      s21_divide_integer(fractional, two, &fractional, &remainder);
-      s21_add(quotient, fractional, &quotient);
-      fractional = remainder;
-    }
-  }
-
-  // Combine integer and fractional parts
-  s21_combine_parts(quotient, fractional, scale, result);
-
-  // Check for overflow
-  if (s21_is_overflow(result)) {
-    return result_sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
-  }
-
-  // Set sign and scale
-  s21_set_sign(result, result_sign);
-  s21_set_scale(result, scale);
-
-  return 0; // Success
+  // Конвертация и проверка переполнения
+  status = s21_big_to_decimal(quotient, result);
+  return status;
 }
-
-
-
-
-
-// int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-//   if (result == NULL) {
-//     return AR_NAN; // Ошибка: указатель на результат равен NULL
-//   }
-//
-//   if (s21_is_zero(value_2)) {
-//     return AR_NAN; // Ошибка: деление на ноль
-//   }
-//
-//   int scale1 = s21_get_exp(value_1);
-//   int scale2 = s21_get_exp(value_2);
-//
-//   if (scale1 > 28 || scale2 > 28) {
-//     return AR_NAN; // Ошибка: некорректный масштаб
-//   }
-//
-//   // Определяем знак результата
-//   int sign1 = s21_get_sign(value_1);
-//   int sign2 = s21_get_sign(value_2);
-//   int result_sign = sign1 ^ sign2;
-//   // Остальная логика функции
-//   s21_decimal abs_1 = s21_absoulute_decimal(value_1);
-//   s21_decimal abs_2 = s21_absoulute_decimal(value_2);
-//
-//   s21_normalize_scales(&abs_1, &abs_2);
-//
-//   s21_decimal quotient = {0};
-//   s21_decimal remainder = {0};
-//   s21_divide_integer(abs_1, abs_2, &quotient, &remainder);
-//
-//   s21_decimal fractional = {0};
-//   int scale = 0;
-//
-//   while (!s21_is_zero(remainder) && scale < 28) {
-//     s21_multiply_by_10(&remainder);
-//     s21_decimal temp = {0};
-//     s21_divide_integer(remainder, abs_2, &temp, &remainder);
-//     s21_add(fractional, temp, &fractional);
-//     scale++;
-//   }
-//
-//   if (scale == 28 && !s21_is_zero(remainder)) {
-//     s21_decimal half_divisor;
-//     s21_decimal two = {{2, 0, 0, 0}};
-//     s21_divide_integer(abs_2, two, &half_divisor, &(s21_decimal){0});
-//
-//     if (s21_compare(remainder, half_divisor) > 0) {
-//       s21_add(fractional, two, &fractional); // Округляем вверх
-//     } else if (s21_compare(remainder, half_divisor) == 0) {
-//       if (fractional.bits[0] & 1) {
-//         s21_add(fractional, two, &fractional); // Округляем до четного
-//       }
-//     }
-//     // Проверка переполнения после округления
-//     if (s21_is_overflow(&fractional)) {
-//       // Обработка переполнения дробной части
-//       scale--;
-//       s21_divide_integer(fractional, two, &fractional, &remainder);
-//       s21_add(quotient, fractional, &quotient);
-//       fractional = remainder;
-//     }
-//   }
-//
-//   s21_combine_parts(quotient, fractional, scale, result);
-//
-//   if (s21_is_overflow(result)) {
-//     return result_sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
-//   }
-//
-//   s21_set_sign(result, result_sign); // Устанавливаем знак результата
-//   s21_set_scale(result, scale);
-//
-//   return 0; // Успех
-// }

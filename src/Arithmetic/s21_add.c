@@ -1,43 +1,58 @@
 #include "s21_arithmetic.h"
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-  int sign1 = s21_get_sign(value_1);
-  int sign2 = s21_get_sign(value_2);
-  if (sign1 != sign2) {
-    if (sign1) {
-      return s21_sub(value_2, s21_absoulute_decimal(value_1), result);
-    } else {
-      return s21_sub(value_1, s21_absoulute_decimal(value_2), result);
-    }
-  }
-
-  for (int i = 0; i < 4; i++) {
-    result->bits[i] = 0;
-  }
-
-  int carry = 0;
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 32; j++) {
-      int bit1 = s21_bit_check(value_1.bits[i], j) ? 1 : 0;
-      int bit2 = s21_bit_check(value_2.bits[i], j) ? 1 : 0;
-      int sum = bit1 + bit2 + carry;
-      if (sum % 2 == 1) {
-        result->bits[i] = s21_bit_add(result->bits[i], j);
-      }
-      carry = sum / 2;
-    }
-  }
-
-  int res_code = 0;
-  if (carry) {
-    res_code = sign1 ? 2 : 1;
-  }
-
-  if (sign1) {
-    result->bits[3] |= (1u << 31);
+  int status = OK;
+  if (result == NULL) {
+    status = CALC_ERROR;
   } else {
-    result->bits[3] &= ~(1u << 31);
-  }
+    memset(result, 0, sizeof(s21_decimal));
+    if (s21_is_zero(value_1)) {
+      *result = value_2;
+      if (s21_is_zero(*result)) result->bits[3] = 0;
+      return OK;
+    }
+    if (s21_is_zero(value_2)) {
+      *result = value_1;
+      if (s21_is_zero(*result)) result->bits[3] = 0;
+      return OK;
+    }
+    s21_big_decimal tmp_1 = s21_decimal_to_big(value_1);
+    s21_big_decimal tmp_2 = s21_decimal_to_big(value_2);
 
-  return res_code;
+    s21_big_decimal tmp_res = {{0}};
+
+    status = s21_normalize_big(&tmp_1, &tmp_2);
+
+    if (status == OK) {
+      int sign1 = s21_get_sign_big(tmp_1);
+      int sign2 = s21_get_sign_big(tmp_2);
+
+      if (sign1 == sign2) {
+
+        tmp_res = s21_add_big(tmp_1, tmp_2);
+        s21_set_sign_big(&tmp_res, sign1);
+      } else {
+
+        if (s21_big_mantissa_is_greater_or_equal(tmp_1, tmp_2)) {
+          tmp_res = s21_sub_big(tmp_1, tmp_2);
+          s21_set_sign_big(&tmp_res, sign1);
+        } else {
+          tmp_res = s21_sub_big(tmp_2, tmp_1);
+          s21_set_sign_big(&tmp_res, sign2);
+        }
+      }
+      int common_scale = s21_get_scale_big(tmp_1);
+      s21_set_scale_big(&tmp_res, common_scale);
+      status = s21_could_be_converted(&tmp_res);
+
+      if (status == OK) {
+        *result = s21_from_big_to_decimal(tmp_res);
+        if (s21_is_zero(*result)) {
+          result->bits[3] = 0;
+        }
+      } else {
+      }
+    }
+  }
+  return status;
 }

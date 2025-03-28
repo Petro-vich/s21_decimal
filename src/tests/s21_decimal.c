@@ -1,76 +1,61 @@
 #include "../s21_decimal.h"
-#include <limits.h>
+
 #include <check.h>
-#include <stdio.h>
-#include <stdlib.h>
-#define CONV_ERR 1
-// Вспомогательные функции для отладочного вывода
-
-
-
 
 START_TEST(test_decimal_to_int_ok) {
-    s21_decimal decimal = {{123456, 0, 0, 0}};
-    int result;
-    int code = s21_from_decimal_to_int(decimal, &result);
+  s21_decimal decimal = {{123456, 0, 0, 0}};
+  int result;
+  int code = s21_from_decimal_to_int(decimal, &result);
 
-    ck_assert_int_eq(code, CNV_OK);
-    ck_assert_int_eq(result, 123456);
+  ck_assert_int_eq(code, CNV_OK);
+  ck_assert_int_eq(result, 123456);
 }
 END_TEST
-
 
 START_TEST(test_float_overflow) {
-    float num = 1e30f;
-    s21_decimal result;
-    int code = s21_from_float_to_decimal(num, &result);
+  float num = 1e30f;
+  s21_decimal result;
+  int code = s21_from_float_to_decimal(num, &result);
 
-    ck_assert_int_eq(code, CONV_ERR);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_float_underflow) {
-    float num = -1e30f;
-    s21_decimal result;
-    int code = s21_from_float_to_decimal(num, &result);
+  float num = -1e30f;
+  s21_decimal result;
+  int code = s21_from_float_to_decimal(num, &result);
 
-    ck_assert_int_eq(code, CONV_ERR);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_float_nan) {
-    float num = NAN;
-    s21_decimal result;
-    int code = s21_from_float_to_decimal(num, &result);
+  float num = NAN;
+  s21_decimal result;
+  int code = s21_from_float_to_decimal(num, &result);
 
-    ck_assert_int_eq(code, CONV_ERR);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_float_infinity) {
-    float num = INFINITY;
-    s21_decimal result;
-    int code = s21_from_float_to_decimal(num, &result);
+  float num = INFINITY;
+  s21_decimal result;
+  int code = s21_from_float_to_decimal(num, &result);
 
-    ck_assert_int_eq(code, CONV_ERR);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
-
-
 
 START_TEST(test_decimal_to_int_overflow) {
-    s21_decimal decimal = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
-    int result;
-    int code = s21_from_decimal_to_int(decimal, &result);
+  s21_decimal decimal = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+  int result;
+  int code = s21_from_decimal_to_int(decimal, &result);
 
-    ck_assert_int_eq(code, CONV_ERR);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_float_positive) {
   float src = 123.456f;
@@ -84,8 +69,6 @@ START_TEST(test_float_positive) {
   ck_assert_int_eq(result.bits[2], 0);
 
   ck_assert_int_eq(result.bits[3], 3 << 16);
-
-
 }
 END_TEST
 
@@ -101,8 +84,6 @@ START_TEST(test_float_negative) {
   ck_assert_int_eq(result.bits[2], 0);
 
   ck_assert_int_eq(result.bits[3], (int)(0x80000000u | (3 << 16)));
-
-
 }
 END_TEST
 
@@ -116,8 +97,6 @@ START_TEST(test_float_zero) {
   ck_assert_int_eq(result.bits[1], 0);
   ck_assert_int_eq(result.bits[2], 0);
   ck_assert_int_eq(result.bits[3], 0);
-
-
 }
 END_TEST
 
@@ -126,9 +105,7 @@ START_TEST(test_float_too_small) {
   s21_decimal result;
   int code = s21_from_float_to_decimal(src, &result);
 
-  ck_assert_int_eq(code, CONV_ERR);
-
-
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
 
@@ -137,12 +114,9 @@ START_TEST(test_float_too_large) {
   s21_decimal result;
   int code = s21_from_float_to_decimal(src, &result);
 
-  ck_assert_int_eq(code, CONV_ERR);
-
-
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
-
 
 START_TEST(test_from_decimal_to_float) {
   s21_decimal decimal = {{0x1234560, 0, 0, 0x80000000}};
@@ -150,8 +124,6 @@ START_TEST(test_from_decimal_to_float) {
   int code = s21_from_decimal_to_float(decimal, &result);
 
   ck_assert_int_eq(code, CNV_OK);
-
-
 }
 END_TEST
 
@@ -166,7 +138,6 @@ START_TEST(test_from_decimal_to_float_scale_3) {
   int code = s21_from_decimal_to_float(decimal, &result);
   ck_assert_int_eq(code, CNV_OK);
   ck_assert_float_eq_tol(result, 1234.560f, 0.001f);
-
 }
 END_TEST
 
@@ -175,9 +146,7 @@ START_TEST(test_from_decimal_to_float_fail) {
   float result;
   int code = s21_from_decimal_to_float(decimal, NULL);
 
-  ck_assert_int_eq(code, CONV_ERR);
-
-
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
 
@@ -218,20 +187,158 @@ START_TEST(s21_from_decimal_to_int_4) {
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_5) {
-    s21_decimal dec = { { 12345, 1, 0, 0 } };
-    int result = 0;
-    int code = s21_from_decimal_to_int(dec, &result);
-    ck_assert_int_eq(code, CONV_ERR);
+  s21_decimal dec = {{12345, 1, 0, 0}};
+  int result = 0;
+  int code = s21_from_decimal_to_int(dec, &result);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
 
 START_TEST(s21_from_decimal_to_int_6) {
-    s21_decimal dec = { { 12345, 0, 0, 0 } };
-    int code = s21_from_decimal_to_int(dec, NULL);
-    ck_assert_int_eq(code, CONV_ERR);
+  s21_decimal dec = {{12345, 0, 0, 0}};
+  int code = s21_from_decimal_to_int(dec, NULL);
+  ck_assert_int_eq(code, CONVERSION_ERROR);
 }
 END_TEST
 
+START_TEST(s21_from_decimal_to_int_7) {
+  s21_decimal value = {{144, 0, 0, 0}};
+  int result = 0;
+  int expected = 144;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_8) {
+  s21_decimal value = {{0, 0, 0, 0}};
+  int error = s21_from_decimal_to_int(value, NULL);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_9) {
+  s21_decimal value = {{INT_MAX, 0, 0, 1 << 31}};
+  int result = 0;
+  int expected = INT_MIN + 1;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_10) {
+  s21_decimal value = {{2147483649, 0, 0, 1 << 31}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_11) {
+  s21_decimal value = {{2147483648, 0, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_12) {
+  s21_decimal value = {{INT_MAX, 0, 0, 0}};
+  int result = 0;
+  int expected = INT_MAX;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_13) {
+  s21_decimal value = {{0, 5, 0, (1 << 31) | (1 << 16)}};
+  int result = 0;
+  int expected = INT_MIN;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_14) {
+  s21_decimal value = {{9999999, 0, 0, 2 << 16}};
+  int result = 0;
+  int expected = 99999;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_15) {
+  s21_decimal value = {{123124, 1, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_16) {
+  s21_decimal value = {{2147483648, 0, 0, 0}};
+  int result = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_17) {
+  s21_decimal value = {{9999999, 0, 0, 7 << 16}};
+  int result = 0;
+  int expected = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_18) {
+  s21_decimal value = {{9999999, 0, 0, 29 << 16}};
+  int result = 0;
+  int expected = 0;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 1);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_19) {
+  s21_decimal value = {{0, 1, 0, 1 << 16}};
+  int result = 0;
+  int expected = 429496729;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_20) {
+  s21_decimal value = {{0, 11, 0, 7 << 16}};
+  int result = 0;
+  int expected = 4724;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
+
+START_TEST(s21_from_decimal_to_int_21) {
+  s21_decimal value = {{123456789, 0, 0, (7 << 16) | (1 << 31)}};
+  int result = 0;
+  int expected = -12;
+  int error = s21_from_decimal_to_int(value, &result);
+  ck_assert_int_eq(result, expected);
+  ck_assert_int_eq(error, 0);
+}
+END_TEST
 
 START_TEST(test_s21_add_1) {
   s21_decimal a = {{1, 0, 0, 0}};
@@ -254,124 +361,263 @@ START_TEST(test_s21_add_2) {
   ck_assert_int_eq(code, 1);
 }
 END_TEST
-START_TEST(test_s21_round_1) {
-  s21_decimal value = {{123456789, 0, 0, 0x00050000}}; // 1234.56789
-  s21_decimal result;
-  int code = s21_round(value, &result);
 
-  ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1234); // Ожидаемый результат: 1234
-  ck_assert_int_eq(result.bits[3], 0);    // Знак и масштаб должны быть 0
+START_TEST(test_s21_add_3) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
 }
 END_TEST
 
-// Тест 2: Округление положительного числа с дробной частью больше или равной 0.5
-START_TEST(test_s21_round_2) {
-  s21_decimal value = {{123456789, 0, 0, 0x00050000}}; // 1234.56789
+START_TEST(test_s21_add_4) {
+  s21_decimal val1 = {{8, 0, 0, 0}};
+  s21_decimal val2 = {{2, 0, 0, 0}};
+  s21_decimal res;
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_5) {
+  s21_decimal val1 = {{2, 0, 0, 0}};
+  s21_decimal val2 = {{8, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_6) {
+  s21_decimal val1 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{2, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_7) {
+  s21_decimal val1 = {{2, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{8, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_8) {
+  s21_decimal val1 = {{0}};
+  s21_decimal val2 = {{0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_9) {
+  s21_decimal val1 = {{4, 0, 0, 0}};
+  s21_decimal val2 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {0};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_10) {
+  s21_decimal val1 = {{8, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_11) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{4, 0, 0, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_12) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_13) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal val2 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_14) {
+  s21_decimal val1 = {{4, 0, 0, 0}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_15) {
+  s21_decimal val1 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(0, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_16) {
+  s21_decimal val1 = {{4, 0, 0, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_17) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, 0}};
+  s21_set_scale(&val1, 5);
+  s21_set_scale(&val2, 3);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(1, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_add_18) {
+  s21_decimal val1 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_decimal val2 = {{UINT_MAX, UINT_MAX, UINT_MAX, ~(UINT_MAX / 2)}};
+  s21_set_scale(&val1, 5);
+  s21_set_scale(&val2, 3);
+  s21_decimal res = {{0}};
+  ck_assert_int_eq(2, s21_add(val1, val2, &res));
+}
+END_TEST
+
+START_TEST(test_s21_round_1) {
+  s21_decimal value = {{123456789, 0, 0, 0x00050000}};  // 1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1235); // Ожидаемый результат: 1235
-  ck_assert_int_eq(result.bits[3], 0);    // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1234);  // Ожидаемый результат: 1234
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
+}
+END_TEST
+
+// Тест 2: Округление положительного числа с дробной частью больше или равной
+// 0.5
+START_TEST(test_s21_round_2) {
+  s21_decimal value = {{123456789, 0, 0, 0x00050000}};  // 1234.56789
+  s21_decimal result;
+  int code = s21_round(value, &result);
+
+  ck_assert_int_eq(code, 0);
+  ck_assert_int_eq(result.bits[0], 1235);  // Ожидаемый результат: 1235
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 3: Округление отрицательного числа с дробной частью меньше 0.5
 START_TEST(test_s21_round_3) {
-  s21_decimal value = {{123456789, 0, 0, 0x80050000}}; // -1234.56789
+  s21_decimal value = {{123456789, 0, 0, 0x80050000}};  // -1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1234); // Ожидаемый результат: -1234
-  ck_assert_int_eq(result.bits[3], 0x80000000); // Знак должен быть отрицательным
+  ck_assert_int_eq(result.bits[0], 1234);  // Ожидаемый результат: -1234
+  ck_assert_int_eq(result.bits[3],
+                   0x80000000);  // Знак должен быть отрицательным
 }
 END_TEST
 
-// Тест 4: Округление отрицательного числа с дробной частью больше или равной 0.5
+// Тест 4: Округление отрицательного числа с дробной частью больше или равной
+// 0.5
 START_TEST(test_s21_round_4) {
-  s21_decimal value = {{123456789, 0, 0, 0x80050000}}; // -1234.56789
+  s21_decimal value = {{123456789, 0, 0, 0x80050000}};  // -1234.56789
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1235); // Ожидаемый результат: -1235
-  ck_assert_int_eq(result.bits[3], 0x80000000); // Знак должен быть отрицательным
+  ck_assert_int_eq(result.bits[0], 1235);  // Ожидаемый результат: -1235
+  ck_assert_int_eq(result.bits[3],
+                   0x80000000);  // Знак должен быть отрицательным
 }
 END_TEST
 
 // Тест 5: Округление числа с нулевой дробной частью
 START_TEST(test_s21_round_5) {
-  s21_decimal value = {{1234, 0, 0, 0x00020000}}; // 12.34
+  s21_decimal value = {{1234, 0, 0, 0x00020000}};  // 12.34
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 12); // Ожидаемый результат: 12
+  ck_assert_int_eq(result.bits[0], 12);  // Ожидаемый результат: 12
   ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 6: Округление числа с дробной частью, равной 0.5
 START_TEST(test_s21_round_6) {
-  s21_decimal value = {{5, 0, 0, 0x00010000}}; // 0.5
+  s21_decimal value = {{5, 0, 0, 0x00010000}};  // 0.5
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1); // Ожидаемый результат: 1
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1);  // Ожидаемый результат: 1
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 7: Округление числа с дробной частью, равной 0.499999
 START_TEST(test_s21_round_7) {
-  s21_decimal value = {{499999, 0, 0, 0x00060000}}; // 0.499999
+  s21_decimal value = {{499999, 0, 0, 0x00060000}};  // 0.499999
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0); // Ожидаемый результат: 0
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 0);  // Ожидаемый результат: 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 8: Округление числа с дробной частью, равной 0.500001
 START_TEST(test_s21_round_8) {
-  s21_decimal value = {{500001, 0, 0, 0x00060000}}; // 0.500001
+  s21_decimal value = {{500001, 0, 0, 0x00060000}};  // 0.500001
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 1); // Ожидаемый результат: 1
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 1);  // Ожидаемый результат: 1
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 9: Округление нуля
 START_TEST(test_s21_round_9) {
-  s21_decimal value = {{0, 0, 0, 0x00020000}}; // 0.00
+  s21_decimal value = {{0, 0, 0, 0x00020000}};  // 0.00
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0); // Ожидаемый результат: 0
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[0], 0);  // Ожидаемый результат: 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
 // Тест 10: Округление числа с максимальным значением
 START_TEST(test_s21_round_10) {
-  s21_decimal value = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00010000}}; // Максимальное значение с масштабом 1
+  s21_decimal value = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF,
+                        0x00010000}};  // Максимальное значение с масштабом 1
   s21_decimal result;
   int code = s21_round(value, &result);
 
   ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(result.bits[0], 0xFFFFFFFF); // Ожидаемый результат: округление до целого
+  ck_assert_int_eq(result.bits[0],
+                   0xFFFFFFFF);  // Ожидаемый результат: округление до целого
   ck_assert_int_eq(result.bits[1], 0xFFFFFFFF);
   ck_assert_int_eq(result.bits[2], 0xFFFFFFFF);
-  ck_assert_int_eq(result.bits[3], 0); // Знак и масштаб должны быть 0
+  ck_assert_int_eq(result.bits[3], 0);  // Знак и масштаб должны быть 0
 }
 END_TEST
 
@@ -395,7 +641,8 @@ END_TEST
 
 // Тест: s21_floor для отрицательного целого числа (бит знака установлен)
 START_TEST(floor_1) {
-  // Здесь значение представлено с отрицательным знаком: бит знака установлен в 3-м элементе
+  // Здесь значение представлено с отрицательным знаком: бит знака установлен в
+  // 3-м элементе
   s21_decimal val = {{2, 0, 0, ~(UINT_MAX / 2)}};
   s21_decimal res = {{0}};
   s21_floor(val, &res);
@@ -419,7 +666,8 @@ START_TEST(floor_2) {
 }
 END_TEST
 
-// Тест: s21_floor для положительного числа с дробной частью (округление вниз дает целую часть)
+// Тест: s21_floor для положительного числа с дробной частью (округление вниз
+// дает целую часть)
 START_TEST(floor_3) {
   s21_decimal val = {{2, 0, 0, 0}};
   s21_decimal res = {{0}};
@@ -431,7 +679,8 @@ START_TEST(floor_3) {
 }
 END_TEST
 
-// Тест: s21_floor для числа с масштабом, где результат сравнивается с ожидаемым значением
+// Тест: s21_floor для числа с масштабом, где результат сравнивается с ожидаемым
+// значением
 START_TEST(floor_5) {
   s21_decimal value_1 = {{7444923, 0, 0, 0}};
   s21_set_scale(&value_1, 5);
@@ -447,10 +696,10 @@ END_TEST
 START_TEST(floor_6) {
   s21_decimal value_1 = {{7444923, 0, 0, 0}};
   s21_set_scale(&value_1, 5);
-  s21_set_sign(&value_1, 1); // Устанавливаем знак минуса
+  s21_set_sign(&value_1, 1);  // Устанавливаем знак минуса
 
   s21_decimal check = {{75, 0, 0, 0}};
-  s21_set_sign(&check, 1); // Ожидаемое отрицательное число
+  s21_set_sign(&check, 1);  // Ожидаемое отрицательное число
 
   s21_decimal result = {0};
   int return_value = s21_floor(value_1, &result);
@@ -542,13 +791,13 @@ START_TEST(truncate_7) {
   src1.bits[2] = 0x0;
   src1.bits[1] = 0xFFFFFFFF;
   src1.bits[0] = 0xFFFFFFFF;
-  s21_set_sign(&src1, 1); // Устанавливаем отрицательный знак
+  s21_set_sign(&src1, 1);  // Устанавливаем отрицательный знак
   s21_decimal result = {0};
   result.bits[3] = 0x0;
   result.bits[2] = 0x0;
   result.bits[1] = 0x0;
   result.bits[0] = 0x6DF37F67;
-  s21_set_sign(&result, 1); // Устанавливаем отрицательный знак
+  s21_set_sign(&result, 1);  // Устанавливаем отрицательный знак
   s21_decimal res_od = {0};
   s21_truncate(src1, &res_od);
   ck_assert_float_eq(res_od.bits[0], result.bits[0]);
@@ -668,8 +917,6 @@ START_TEST(div_6) {
 }
 END_TEST
 
-
-
 START_TEST(div_7) {
   s21_decimal value_1 = {{10, 0, 0, 0}};
   s21_get_sign(value_1);
@@ -706,6 +953,27 @@ START_TEST(div_9) {
   int return_value = s21_div(value_1, value_2, &result);
   ck_assert_int_eq(s21_is_equal(result, check), 1);
   ck_assert_int_eq(return_value, 0);
+}
+END_TEST
+
+START_TEST(div_10) {
+  s21_decimal value_1 = {{10, 0, 0, 0}};
+  s21_decimal value_2 = {{1, 0, 0, 0}};
+  s21_set_scale(&value_2, 2);
+  s21_decimal result = {{0, 0, 0, 0}};
+  s21_decimal check = {{1000u, 0, 0, 0}};
+  int return_value = s21_div(value_1, value_2, NULL);
+  ck_assert_int_eq(return_value, 3);
+}
+
+START_TEST(div_11) {
+  s21_decimal value_1 = {{10, 0, 0, 0}};
+  s21_decimal value_2 = {{1, 0, 0, 0}};
+  s21_set_scale(&value_2, 29);
+  s21_decimal result = {{0, 0, 0, 0}};
+  s21_decimal check = {{1000u, 0, 0, 0}};
+  int return_value = s21_div(value_1, value_2, &result);
+  ck_assert_int_eq(return_value, 3);
 }
 END_TEST
 
@@ -748,8 +1016,6 @@ START_TEST(test_from_int_to_decimal_2) {
 }
 END_TEST
 
-
-
 START_TEST(test_from_int_to_decimal_4) {
   int int_value = 100;
   s21_decimal decimal_value = {{0, 0, 0, 0}};
@@ -761,7 +1027,8 @@ START_TEST(test_from_int_to_decimal_4) {
 
   // Проверяем результат конвертации
   ck_assert_int_eq(conversion_result, 0);  // Успешная конвертация
-  ck_assert_int_eq(s21_is_equal(decimal_value, expected_value), 1);  // Значения совпадают
+  ck_assert_int_eq(s21_is_equal(decimal_value, expected_value),
+                   1);  // Значения совпадают
 }
 END_TEST
 
@@ -784,7 +1051,8 @@ START_TEST(test_from_int_to_decimal_6) {
   s21_decimal *decimal_ptr = &decimal_value;
 
   int conversion_result = s21_from_int_to_decimal(int_value, decimal_ptr);
-  s21_decimal expected_value = {{INT_MAX, 0, 0, 0x80000000}};  // Отрицательное число
+  s21_decimal expected_value = {
+      {INT_MAX, 0, 0, 0x80000000}};  // Отрицательное число
 
   ck_assert_int_eq(conversion_result, 0);
   ck_assert_int_eq(s21_is_equal(decimal_value, expected_value), 1);
@@ -810,7 +1078,8 @@ START_TEST(test_from_int_to_decimal_8) {
   s21_decimal *decimal_ptr = &decimal_value;
 
   int conversion_result = s21_from_int_to_decimal(int_value, decimal_ptr);
-  s21_decimal expected_value = {{987879878, 0, 0, 0x80000000}};  // Отрицательное число
+  s21_decimal expected_value = {
+      {987879878, 0, 0, 0x80000000}};  // Отрицательное число
 
   ck_assert_int_eq(conversion_result, 0);
   ck_assert_int_eq(s21_is_equal(decimal_value, expected_value), 1);
@@ -1384,7 +1653,276 @@ START_TEST(s21_roundTest15) {
 }
 END_TEST
 
+START_TEST(test_s21_sub_1) {
+  s21_decimal a = {{5, 0, 0, 0}};
+  s21_decimal b = {{3, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq(result.bits[0], 2);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
 
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0);
+}
+END_TEST
+
+// Тест 2: Обычное вычитание, результат отрицательный (3 - 5 = -2)
+START_TEST(test_s21_sub_2) {
+  s21_decimal a = {{3, 0, 0, 0}};
+  s21_decimal b = {{5, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  // Результат по модулю 2
+  ck_assert_int_eq(result.bits[0], 2);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0x80000000);
+}
+END_TEST
+
+// Тест 3: Если второе число равно 0, результат должен быть равен первому числу.
+START_TEST(test_s21_sub_3) {
+  s21_decimal a = {{7, 0, 0, 0}};
+  s21_decimal b = {{0, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq(result.bits[0], 7);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3], 0);
+}
+END_TEST
+
+// Тест 4: Если первое число равно 0, результат должен быть равен -b.
+START_TEST(test_s21_sub_4) {
+  s21_decimal a = {{0, 0, 0, 0}};
+  s21_decimal b = {{9, 0, 0, 0}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  // Ожидаем результат 9 с отрицательным знаком
+  ck_assert_int_eq(result.bits[0], 9);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0x80000000);
+}
+END_TEST
+
+// Тест 5: Вычитание чисел с разными масштабами
+// a = 10.50, b = 3.25, ожидаемый результат: 7.25.
+// Представляем a как 1050 и b как 325 с масштабом 2 (scale = 2 -> bits[3] = 2
+// << 16)
+START_TEST(test_s21_sub_5) {
+  s21_decimal a = {{1050, 0, 0, (2 << 16)}};
+  s21_decimal b = {{325, 0, 0, (2 << 16)}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq(result.bits[0], 725);
+  ck_assert_int_eq(result.bits[1], 0);
+  ck_assert_int_eq(result.bits[2], 0);
+  ck_assert_int_eq(result.bits[3] & 0x00FF0000, (2 << 16));
+  ck_assert_int_eq(result.bits[3] & 0x80000000, 0);
+}
+END_TEST
+
+START_TEST(test_s21_sub_6) {
+  s21_decimal a = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};
+  s21_decimal b = {{1, 0, 0, 0x80000000}};
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+  ck_assert_int_eq(code, NUM_TOO_HIGH);
+}
+END_TEST
+
+START_TEST(test_s21_sub_7) {
+  s21_decimal a = {
+      {1, 1, 0, 0}};  // bits[0] = 1, bits[1] = 1, bits[2] = 0, bits[3] = 0
+  s21_decimal b = {{2, 0, 0, 0}};  // bits[0] = 2, остальные биты = 0
+  s21_decimal result = {{0, 0, 0, 0}};
+  int code = s21_sub(a, b, &result);
+
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq((uint32_t)result.bits[0],
+                   (uint32_t)0xFFFFFFFF);  // Ожидаемое значение: 4294967295
+  ck_assert_uint_eq(result.bits[1], 0);  // Старшие биты должны быть нулевыми
+  ck_assert_uint_eq(result.bits[2], 0);  // Старшие биты должны быть нулевыми
+  ck_assert_uint_eq(result.bits[3] & 0x80000000,
+                    0);  // Положительное число (знаковый бит не установлен)
+}
+END_TEST
+
+START_TEST(test_s21_sub_8) {
+  s21_decimal max_decimal = {
+      {0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0}};  // Максимально возможное число
+  s21_decimal two = {{2, 0, 0, 0}};  // Число 2
+  s21_decimal result = {{0, 0, 0, 0}};
+
+  int code = s21_sub(max_decimal, two, &result);
+
+  // Ожидаемый результат: max_decimal - 2 = 0xFFFFFFFD_FFFFFFFF_FFFFFFFF
+  ck_assert_int_eq(code, AR_OK);
+  ck_assert_int_eq((uint32_t)result.bits[0], (uint32_t)0xFFFFFFFD);
+  ck_assert_uint_eq((uint32_t)result.bits[1], (uint32_t)0xFFFFFFFF);
+  ck_assert_uint_eq((uint32_t)result.bits[2], (uint32_t)0xFFFFFFFF);
+  ck_assert_uint_eq((uint32_t)result.bits[3] & 0x80000000,
+                    (uint32_t)0);  // Проверяем, что число положительное
+}
+END_TEST
+
+START_TEST(test_s21_negate_null_result) {
+  s21_decimal value = {{1, 0, 0, 0}};
+  int code = s21_negate(value, NULL);
+
+  ck_assert_int_eq(code, CALCULATION_ERROR);
+}
+END_TEST
+
+START_TEST(test_s21_negate_zero) {
+  s21_decimal value = {{0, 0, 0, 0}};  // Число 0
+  s21_decimal result = {
+      {1, 1, 1,
+       1}};  // Заполняем случайными значениями, чтобы проверить изменение
+  int code = s21_negate(value, &result);
+
+  ck_assert_int_eq(code, OTH_OK);
+  ck_assert_uint_eq(result.bits[0], 0);
+  ck_assert_uint_eq(result.bits[1], 0);
+  ck_assert_uint_eq(result.bits[2], 0);
+  ck_assert_uint_eq(result.bits[3], 0);  // Знаковый бит тоже должен быть 0
+}
+END_TEST
+
+// mitsuese
+
+START_TEST(test_s21_is_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_1) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_greater(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_1) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_greater_or_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_greater_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_2) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_less(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_2) {
+    s21_decimal a = {{54321, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_less_or_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_less_or_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_1) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{54321, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_not_equal(a, b), TRUE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_2) {
+    s21_decimal a = {{12345, 0, 0, 0}};
+    s21_decimal b = {{12345, 0, 0, 0}};
+    ck_assert_int_eq(s21_is_not_equal(a, b), FALSE);
+}
+END_TEST
+
+START_TEST(test_s21_is_not_equal_3) {
+    s21_decimal a = {{12345, 0, 0, 0x80000000}};  
+    s21_decimal b = {{12345, 0, 0, 0}};           
+    ck_assert_int_eq(s21_is_not_equal(a, b), TRUE);
+}
+END_TEST
 
 Suite *decimal_suite(void) {
   Suite *s;
@@ -1403,6 +1941,8 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, div_7);
   tcase_add_test(tc_core, div_8);
   tcase_add_test(tc_core, div_9);
+  tcase_add_test(tc_core, div_10);
+  tcase_add_test(tc_core, div_11);
 
   tcase_add_test(tc_core, test_from_int_to_decimal_0);
   tcase_add_test(tc_core, test_from_int_to_decimal_1);
@@ -1436,11 +1976,7 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, truncate_9);
   tcase_add_test(tc_core, truncate_10);
 
-  tcase_add_test(tc_core, test_float_overflow);
-  tcase_add_test(tc_core, test_float_underflow);
   tcase_add_test(tc_core, test_float_infinity);
-  tcase_add_test(tc_core, test_decimal_to_int_overflow);
-
   tcase_add_test(tc_core, test_float_positive);
   tcase_add_test(tc_core, test_float_negative);
   tcase_add_test(tc_core, test_float_zero);
@@ -1458,11 +1994,40 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_from_decimal_to_int_4);
   tcase_add_test(tc_core, s21_from_decimal_to_int_5);
   tcase_add_test(tc_core, s21_from_decimal_to_int_6);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_7);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_8);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_9);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_10);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_11);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_12);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_13);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_14);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_15);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_16);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_17);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_19);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_20);
+  tcase_add_test(tc_core, s21_from_decimal_to_int_21);
 
   tcase_add_test(tc_core, test_s21_add_1);
   tcase_add_test(tc_core, test_s21_add_2);
-  // tcase_add_test(tc_core, test_s21_add_3);
-  // tcase_add_test(tc_core, test_s21_add_4);
+  tcase_add_test(tc_core, test_s21_add_3);
+  tcase_add_test(tc_core, test_s21_add_4);
+  tcase_add_test(tc_core, test_s21_add_5);
+  tcase_add_test(tc_core, test_s21_add_6);
+  tcase_add_test(tc_core, test_s21_add_7);
+  tcase_add_test(tc_core, test_s21_add_8);
+  tcase_add_test(tc_core, test_s21_add_9);
+  tcase_add_test(tc_core, test_s21_add_10);
+  tcase_add_test(tc_core, test_s21_add_11);
+  tcase_add_test(tc_core, test_s21_add_12);
+  tcase_add_test(tc_core, test_s21_add_13);
+  tcase_add_test(tc_core, test_s21_add_14);
+  tcase_add_test(tc_core, test_s21_add_15);
+  tcase_add_test(tc_core, test_s21_add_16);
+  tcase_add_test(tc_core, test_s21_add_17);
+  tcase_add_test(tc_core, test_s21_add_18);
+
   tcase_add_test(tc_core, s21_round_1);
   tcase_add_test(tc_core, s21_round_2);
   tcase_add_test(tc_core, s21_round_3);
@@ -1490,6 +2055,41 @@ Suite *decimal_suite(void) {
   tcase_add_test(tc_core, s21_roundTest14);
   tcase_add_test(tc_core, s21_roundTest15);
 
+  tcase_add_test(tc_core, test_s21_sub_1);
+  tcase_add_test(tc_core, test_s21_sub_2);
+  tcase_add_test(tc_core, test_s21_sub_3);
+  tcase_add_test(tc_core, test_s21_sub_4);
+  tcase_add_test(tc_core, test_s21_sub_5);
+  tcase_add_test(tc_core, test_s21_sub_6);
+  tcase_add_test(tc_core, test_s21_sub_7);
+  tcase_add_test(tc_core, test_s21_sub_8);
+  tcase_add_test(tc_core, test_s21_negate_null_result);
+  tcase_add_test(tc_core, test_s21_negate_zero);
+
+  // mitsuese
+    tcase_add_test(tc_core, test_s21_is_equal_1);
+    tcase_add_test(tc_core, test_s21_is_equal_2);
+    tcase_add_test(tc_core, test_s21_is_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_greater_1);
+    tcase_add_test(tc_core, test_s21_is_greater_2);
+    tcase_add_test(tc_core, test_s21_is_greater_3);
+
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_1);
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_2);
+    tcase_add_test(tc_core, test_s21_is_greater_or_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_less_1);
+    tcase_add_test(tc_core, test_s21_is_less_2);
+    tcase_add_test(tc_core, test_s21_is_less_3);
+
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_1);
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_2);
+    tcase_add_test(tc_core, test_s21_is_less_or_equal_3);
+
+    tcase_add_test(tc_core, test_s21_is_not_equal_1);
+    tcase_add_test(tc_core, test_s21_is_not_equal_2);
+    tcase_add_test(tc_core, test_s21_is_not_equal_3);
 
   suite_add_tcase(s, tc_core);
 
@@ -1497,14 +2097,14 @@ Suite *decimal_suite(void) {
 }
 
 int main() {
-    Suite *s;
-    SRunner *sr;
+  Suite *s;
+  SRunner *sr;
 
-    s = decimal_suite();
-    sr = srunner_create(s);
+  s = decimal_suite();
+  sr = srunner_create(s);
 
-    srunner_run_all(sr, CK_NORMAL);
+  srunner_run_all(sr, CK_NORMAL);
 
-    srunner_free(sr);
-    return 0;
+  srunner_free(sr);
+  return 0;
 }

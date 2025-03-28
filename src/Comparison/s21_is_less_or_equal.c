@@ -1,6 +1,6 @@
 #include "s21_comparison.h"
 
-int s21_is_less_or_equal(s21_decimal,
-                         s21_decimal) {  // Less than or equal to	<=
-  return 0;
+// decimal_1 <=decimal_2
+int s21_is_less_or_equal(s21_decimal value_1, s21_decimal value_2) {
+    return s21_compare_decimals(value_1, value_2) <= 0;
 }

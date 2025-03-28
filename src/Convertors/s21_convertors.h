@@ -2,7 +2,7 @@
 #define S21_CONVERTORS
 
 #include "../s21_decimal.h"
-
+#include "../Helpers/helpers.h"
 enum ERROR_CODES_CNV { CNV_OK, CONVERSION_ERROR };
 // 0 — OK;
 // 1 — ошибка конвертации.

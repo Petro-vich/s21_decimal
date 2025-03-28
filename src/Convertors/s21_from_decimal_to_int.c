@@ -1,26 +1,33 @@
 #include "s21_convertors.h"
 
-int s21_from_decimal_to_int(s21_decimal src, int *dst) {  // В int
-  if (!dst) {
+int s21_from_decimal_to_int(s21_decimal src, int *dst) {
+  if (!dst) return CONVERSION_ERROR;
+
+  // Работа с копией для сохранения исходных данных
+  s21_decimal tmp = src;
+
+  // Уменьшение масштаба (деление на 10^scale)
+  int scale = s21_get_scale(tmp.bits[3]);
+  scale = (scale < 0) ? 0 : scale; // Защита от отрицательного scale
+
+  while (scale-- > 0) {
+    unsigned rem = 0;
+    for (int i = 2; i >= 0; i--) {
+      unsigned long temp = (unsigned long)rem * (1UL << 32) + tmp.bits[i];
+      tmp.bits[i] = (unsigned)(temp / 10);
+      rem = (unsigned)(temp % 10);
+    }
+  }
+
+  // Проверка переполнения
+  int sign = s21_check_sign(tmp.bits[3]);
+  unsigned val = tmp.bits[0];
+  unsigned max_val = sign ? (unsigned)INT_MAX + 1 : (unsigned)INT_MAX;
+
+  if (tmp.bits[1] || tmp.bits[2] || val > max_val) {
     return CONVERSION_ERROR;
   }
 
-  if (src.bits[1] != 0 || src.bits[2] != 0) {
-    return CONVERSION_ERROR;
-  }
-
-  int scale = (src.bits[3] >> 16) & 0xFF;
-
-  int value = src.bits[0];
-
-  for (int i = 0; i < scale; i++) {
-    value /= 10;
-  }
-
-  if (src.bits[3] & 0x80000000) {
-    value = -value;
-  }
-
-  *dst = value;
+  *dst = sign ? -(int)val : (int)val;
   return CNV_OK;
 }
