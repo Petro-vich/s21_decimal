@@ -1,8 +1,19 @@
     #ifndef HELPERS
     #define HELPERS
 
+    #define S21_SIGN_MASK 0x80000000
+    #define S21_SCALE_MASK 0x00FF0000 
+    #define S21_SCALE_SHIFT 16
+    #define S21_HIGH_BIT_UINT 0x80000000 
+    #define S21_MAX_UINT 0xFFFFFFFF
+
     #include "../s21_decimal.h"
 
+    enum ERROR_CODES_HELPERS {HELPERS_OK, HELPERS_ERROR };
+    // 0 — OK;
+    // 1 — ошибка вычисления.
+
+    
     // Геттеры и сеттеры
     int s21_is_zero(s21_decimal value);
     int s21_get_sign(s21_decimal value);

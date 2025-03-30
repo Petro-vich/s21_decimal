@@ -15,12 +15,7 @@ int s21_get_scale(unsigned value) {
 void s21_set_scale(unsigned *bits, unsigned scale) {
   *bits = (*bits & 0xFF00FFFF) | (scale << 16);
 }
-  // Clear existing scale bits
-  value->bits[3] &= ~(S21_SCALE_MASK);
-  // Set new scale bits
-  value->bits[3] |= (scale << S21_SCALE_SHIFT);
-  return OK;
-}
+
 int s21_get_sign_big(s21_big_decimal b_value) {
   return (b_value.bits[7] & S21_SIGN_MASK) != 0;
 }
@@ -84,7 +79,7 @@ s21_big_decimal s21_decimal_to_big(s21_decimal value) {
 // Assumes normalization (scale 0-28, rounding) has already happened.
 // Checks for final mantissa overflow.
 int s21_big_to_decimal(s21_big_decimal b_value, s21_decimal *result) {
-  int status = OK;
+  int status = HELPERS_OK;
   int scale = s21_get_scale_big(b_value);
   int sign = s21_get_sign_big(b_value);
 
@@ -97,13 +92,13 @@ int s21_big_to_decimal(s21_big_decimal b_value, s21_decimal *result) {
   }
 
   // Check if scale is valid (should be after normalization)
-  if (status == OK && (scale < 0 || scale > S21_MAX_SCALE)) {
+  if (status == HELPERS_OK && (scale < 0 || scale > S21_MAX_SCALE)) {
     // This indicates an internal logic error if reached after normalize
     status = sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
   }
 
 
-  if (status == OK) {
+  if (status == HELPERS_OK) {
     memset(result, 0, sizeof(s21_decimal)); // Clear result first
     result->bits[0] = b_value.bits[0];
     result->bits[1] = b_value.bits[1];
@@ -149,10 +144,10 @@ void s21_set_bit_big(s21_big_decimal *b_value, int bit_index, int bit_value) {
 }
 
 // Performs left shift on the mantissa part of big decimal
-// Returns OK or NUM_TOO_HIGH if overflow occurs
+// Returns HELPERS_OK or NUM_TOO_HIGH if overflow occurs
 int s21_left_shift_big(s21_big_decimal *b_value, int shift) {
-  if (shift <= 0) return OK;
-  int status = OK;
+  if (shift <= 0) return HELPERS_OK;
+  int status = HELPERS_OK;
 
   for (int s = 0; s < shift; ++s) {
     unsigned int carry = 0;
@@ -202,7 +197,7 @@ int s21_right_shift_big(s21_big_decimal *b_value, int shift) {
 // --- Arithmetic Helpers for Big Decimal ---
 
 // Adds two big decimal mantissas: result = result + addend
-// Returns OK or NUM_TOO_HIGH on overflow.
+// Returns HELPERS_OK or NUM_TOO_HIGH on overflow.
 int s21_add_big(s21_big_decimal *result, s21_big_decimal addend) {
   unsigned long long carry = 0;
   for (int i = 0; i <= 6; ++i) {
@@ -217,11 +212,11 @@ int s21_add_big(s21_big_decimal *result, s21_big_decimal addend) {
     // memset(result->bits, 0, 7 * sizeof(unsigned int));
     return NUM_TOO_HIGH;
   }
-  return OK;
+  return HELPERS_OK;
 }
 
 // Adds 1 to the big decimal mantissa
-// Returns OK or NUM_TOO_HIGH on overflow.
+// Returns HELPERS_OK or NUM_TOO_HIGH on overflow.
 int s21_add_one_big(s21_big_decimal *result) {
   s21_big_decimal one = {{1, 0, 0, 0, 0, 0, 0, 0}};
   return s21_add_big(result, one);
@@ -259,23 +254,23 @@ int s21_compare_big_mantissa(s21_big_decimal b_val1, s21_big_decimal b_val2) {
 
 // Multiplies a big decimal mantissa by 10
 // Uses shift and add: x * 10 = (x << 3) + (x << 1)
-// Returns OK or NUM_TOO_HIGH on overflow.
+// Returns HELPERS_OK or NUM_TOO_HIGH on overflow.
 int s21_mul_big_by_10(s21_big_decimal *b_value) {
   s21_big_decimal temp_shift_1 = *b_value;
   s21_big_decimal temp_shift_3 = *b_value;
   int status;
 
   status = s21_left_shift_big(&temp_shift_1, 1);
-  if (status != OK) return status; // Overflow on shift 1
+  if (status != HELPERS_OK) return status; // Overflow on shift 1
 
   status = s21_left_shift_big(&temp_shift_3, 3);
-  if (status != OK) return status; // Overflow on shift 3
+  if (status != HELPERS_OK) return status; // Overflow on shift 3
 
   status = s21_add_big(&temp_shift_3, temp_shift_1); // Result in temp_shift_3
-  if (status != OK) return status; // Overflow on addition
+  if (status != HELPERS_OK) return status; // Overflow on addition
 
   *b_value = temp_shift_3; // Update original value
-  return OK;
+  return HELPERS_OK;
 }
 
 s21_big_decimal s21_div_big_by_10(s21_big_decimal value,
@@ -355,24 +350,24 @@ s21_big_decimal s21_div_big_by_mantissa(s21_big_decimal b_dividend,
 
                                         // Normalizes a big decimal: adjusts scale to 0-28, applies banking rounding,
                                         // checks for overflow/underflow.
-                                        // Returns OK, NUM_TOO_HIGH, or NUM_TOO_SMALL.
+                                        // Returns HELPERS_OK, NUM_TOO_HIGH, or NUM_TOO_SMALL.
                                         int s21_normalize_big_decimal(s21_big_decimal *b_value) {
                                           int scale = s21_get_scale_big(*b_value);
                                           int sign = s21_get_sign_big(*b_value);
-                                          int status = OK;
+                                          int status = HELPERS_OK;
                                           int last_remainder = 0; // Store remainder for banking round
 
                                           // 1. Handle Negative Scale (Multiply by 10)
-                                          while (scale < 0 && status == OK) {
+                                          while (scale < 0 && status == HELPERS_OK) {
                                             status = s21_mul_big_by_10(b_value);
                                             scale++;
                                           }
-                                          if (status != OK) {
+                                          if (status != HELPERS_OK) {
                                             return sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
                                           }
 
                                           // 2. Handle Scale > S21_MAX_SCALE (Divide by 10 with rounding)
-                                          while (scale > S21_MAX_SCALE && status == OK) {
+                                          while (scale > S21_MAX_SCALE && status == HELPERS_OK) {
                                             // Check for tiny values becoming zero before division
                                             if (s21_is_zero_big(*b_value)) {
                                               scale = S21_MAX_SCALE; // Or maybe 0? If mantissa is 0, scale doesn't matter much
@@ -393,14 +388,14 @@ s21_big_decimal s21_div_big_by_mantissa(s21_big_decimal b_dividend,
                                                 round_up = 1; // Round to even (add 1 if odd)
                                               }
                                               // Need to check if *further* digits were truncated and non-zero?
-                                              // The simple approach only looks at the first truncated digit (last_remainder).
+                                              // The simple approach only los at the first truncated digit (last_remainder).
                                               // A more precise banking round might need more info if scale was reduced by > 1.
                                               // For this implementation, we base it on the single 'last_remainder'.
                                             }
 
                                             if (round_up) {
                                               status = s21_add_one_big(b_value);
-                                              if (status != OK) {
+                                              if (status != HELPERS_OK) {
                                                 // Overflow during rounding
                                                 return sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
                                               }
