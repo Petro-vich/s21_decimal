@@ -6,7 +6,6 @@
     #define S21_SCALE_SHIFT 16
     #define S21_HIGH_BIT_UINT 0x80000000 
     #define S21_MAX_UINT 0xFFFFFFFF
-    #define S21_MAX_SCALE 28
     #define S21_MAX_BITS 96
     #include "../s21_decimal.h"
 

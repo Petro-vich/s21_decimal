@@ -21,9 +21,9 @@ int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
   // Выравнивание масштабов делимого и делителя
   int scale = s21_align_scales(&dividend, &divisor);
-  if (scale > MAX_SCALE) { // MAX_SCALE = 28
+  if (scale > S21_MAX_SCALE) { // MAX_SCALE = 28
     return (s21_big_get_sign(dividend) ^ s21_big_get_sign(divisor))
-    ? CALC_NEG_INF : CALC_INF;
+    ? NUM_TOO_SMALL : NUM_TOO_HIGH;
   }
 
   // Основной процесс деления

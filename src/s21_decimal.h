@@ -1,6 +1,9 @@
 #ifndef S21_DECIMAL_H_
 #define S21_DECIMAL_H_
 #define CALC_ERROR 1
+#define CALC_UNDEFINED 6 
+
+#define S21_MAX_SCALE 28
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
