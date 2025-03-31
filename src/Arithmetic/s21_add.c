@@ -1,7 +1,7 @@
 #include "s21_arithmetic.h"
 
 int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-  int status = OK;
+  int status = AR_OK;
   if (result == NULL) {
     status = CALC_ERROR;
   } else {
@@ -9,12 +9,12 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
     if (s21_is_zero(value_1)) {
       *result = value_2;
       if (s21_is_zero(*result)) result->bits[3] = 0;
-      return OK;
+      return AR_OK;
     }
     if (s21_is_zero(value_2)) {
       *result = value_1;
       if (s21_is_zero(*result)) result->bits[3] = 0;
-      return OK;
+      return AR_OK;
     }
     s21_big_decimal tmp_1 = s21_decimal_to_big(value_1);
     s21_big_decimal tmp_2 = s21_decimal_to_big(value_2);
@@ -23,7 +23,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
 
     status = s21_normalize_big(&tmp_1, &tmp_2);
 
-    if (status == OK) {
+    if (status == AR_OK) {
       int sign1 = s21_get_sign_big(tmp_1);
       int sign2 = s21_get_sign_big(tmp_2);
 
@@ -45,7 +45,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       s21_set_scale_big(&tmp_res, common_scale);
       status = s21_could_be_converted(&tmp_res);
 
-      if (status == OK) {
+      if (status == AR_OK) {
         *result = s21_from_big_to_decimal(tmp_res);
         if (s21_is_zero(*result)) {
           result->bits[3] = 0;
