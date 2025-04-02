@@ -14,21 +14,6 @@ void s21_set_scale(unsigned *bits, unsigned scale) {
 }
 
 
-
-// Sets the scale in the big decimal's last element (allows > 28 temporarily)
-// No validation here, normalization function handles the range.
-void s21_set_scale_big(s21_big_decimal *b_value, int scale) {
-  // Clear existing scale bits
-  b_value->bits[7] &= ~(S21_SCALE_MASK);
-  // Set new scale bits (handle potential negative scale during intermediate calc)
-  if (scale >= 0) {
-    b_value->bits[7] |= ((unsigned int)scale << S21_SCALE_SHIFT);
-  } else {
-    // Or handle negative scale representation if needed, but usually it's adjusted
-    // This implementation assumes scale is adjusted back to >= 0 before final conversion
-  }
-}
-
 // Checks if the mantissa of a big decimal is zero
 int s21_is_zero_big(s21_big_decimal b_value) {
   int is_zero = 1;
@@ -176,17 +161,7 @@ s21_big_decimal s21_add_big(s21_big_decimal value_1, s21_big_decimal value_2) {
   return result;
 }
 
-// // Adds 1 to the big decimal mantissa
-// // Returns HELPERS_OK or NUM_TOO_HIGH on overflow.
-// s21_big_decimal s21_add_one_big(s21_big_decimal *result) {
-//   s21_big_decimal one = {{1, 0, 0, 0, 0, 0, 0, 0}};
-//   return s21_add_big(result, one);
-// }
 
-
-// Subtracts two big decimal mantissas: result = result - subtrahend
-// Assumes result >= subtrahend. Returns nothing (void).
-// Used within division logic where this assumption holds.
 s21_big_decimal s21_sub_big(s21_big_decimal value_1, s21_big_decimal value_2) {
   s21_big_decimal result = {{0}};
   int debt = 0, sum = 0;
@@ -381,36 +356,75 @@ s21_big_decimal s21_div_big_by_mantissa(s21_big_decimal b_dividend,
                                         int s21_big_mantissa_is_greater(s21_big_decimal value_1, s21_big_decimal value_2) {
                                           return s21_big_mantissa_compare(value_1, value_2) == 1;
                                         }
+int s21_big_mantissa_is_less(s21_big_decimal value_1, s21_big_decimal value_2) {
+  return s21_big_mantissa_compare(value_1, value_2) == -1;
+}                                        
 
-                                        int s21_check_sign(unsigned value) { return (value >> 31) & 1; }
+int s21_check_sign(unsigned value) { return (value >> 31) & 1; }
 
   void s21_set_sign(unsigned *value, int choice) {
   *value = choice ? *value | (choice << 31) : *value & ~(1 << 31);
 }
 int s21_is_overflow(s21_big_decimal a) {
-  // Проверяем, что только младшие 3 элемента (96 бит) задействованы
   for (int i = 3; i < 7; i++) {
     if (a.bits[i] != 0)
       return 1;
   }
   return 0;
 }
+int s21_could_be_converted(s21_big_decimal value) {
+  int ret = AR_OK;
+  int sign = s21_check_sign(value.bits[7]);
+  s21_set_sign(&value.bits[7], 0);
+  int scale = s21_get_scale(value.bits[7]);
+  // if overflow
+  while (scale > 0 && s21_is_overflow(value)) {
+    s21_big_decimal reminader = s21_div_big_by_10(value, &value);
+    s21_big_decimal five = {{5, 0, 0, 0, 0, 0, 0, 0}};
+    if (s21_big_mantissa_is_equal(reminader, five)) {
+      if (value.bits[0] & 1) {
+        value = s21_add_big(value, (s21_big_decimal){{1, 0, 0, 0, 0, 0, 0, 0}});
+      }
+    } else if (s21_big_mantissa_is_greater(reminader, five)) {
+      value = s21_add_big(value, (s21_big_decimal){{1, 0, 0, 0, 0, 0, 0, 0}});
+    }
+    scale--;
+  }
+  if (s21_is_overflow(value)) {
+    if (sign) {
+      ret = NUM_TOO_SMALL;
+    } else {
+      ret = NUM_TOO_HIGH;
+    }
+  }
+  return ret;
+}
+
 s21_decimal s21_from_big_to_decimal(s21_big_decimal a) {
   int sign = s21_check_sign(a.bits[7]);
   s21_set_sign(&a.bits[7], 0);
-  s21_decimal result = {0};
+  s21_decimal b = {0};
   int scale = s21_get_scale(a.bits[7]);
-  // Корректировка масштаба и округление
+  // if overflow
   while ((scale > 0 && s21_is_overflow(a)) || scale > 28) {
-    s21_big_decimal rem = s21_div_big_by_10(a, &a);
-    if (rem.bits[0] >= 5) a = s21_add_one_big(&a);
+    s21_big_decimal reminader = s21_div_big_by_10(a, &a);
+    s21_big_decimal five = {{5, 0, 0, 0, 0, 0, 0, 0}};
+    if (s21_big_mantissa_is_equal(reminader, five)) {
+      if (a.bits[0] & 1) {
+        a = s21_add_big(a, (s21_big_decimal){{1, 0, 0, 0, 0, 0, 0, 0}});
+      }
+    } else if (s21_big_mantissa_is_greater(reminader, five)) {
+      a = s21_add_big(a, (s21_big_decimal){{1, 0, 0, 0, 0, 0, 0, 0}});
+    }
     scale--;
   }
-  // Копирование данных
-  memcpy(result.bits, a.bits, 3 * sizeof(unsigned));
-  result.bits[3] = a.bits[7] | (sign << 31);
-  return result;
+  s21_set_sign(&a.bits[7], sign);
+  for (int i = 0; i < 3; i++) b.bits[i] = a.bits[i];
+  b.bits[3] = a.bits[7];
+  s21_set_scale(&b.bits[3], scale);
+  return b;
 }
+
 int s21_get_width(s21_big_decimal value) {
   int width = 0;
   for (int i = 32 * 7 - 1; i >= 0 && !width; i--) {
@@ -432,9 +446,7 @@ s21_big_decimal s21_div_big(s21_big_decimal divisible, s21_big_decimal divider, 
   }
   return remainder;
 }
-int s21_get_bit_big(s21_big_decimal a, int num) {  // Renamed
-  return (a.bits[num / 32] >> (num % 32)) & 1;
-}
+
 int s21_big_mantissa_is_greater_or_equal(s21_big_decimal value_1,
                                          s21_big_decimal value_2) {
   int compare_result = s21_big_mantissa_compare(value_1, value_2);

@@ -9934,7 +9934,6 @@ Suite *s21_div_cases_4(void) {
   return s;
 }
 
-#include "test.h"
 
 START_TEST(s21_div_2_1) {
   // -30979193270988233338679646780
@@ -16892,7 +16891,7 @@ Suite *s21_div_cases_2(void) {
   suite_add_tcase(c, tc);
   return c;
 }
-#include "test.h"
+
 
 START_TEST(s21_div_3_1) {
   // -5210563158327.0

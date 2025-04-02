@@ -47,7 +47,7 @@ int s21_add(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       // Set scale in big decimal's scale field
       s21_set_scale(&tmp_res.bits[7], common_scale);
       
-      status = s21_could_be_converted(&tmp_res);
+      status = s21_could_be_converted(tmp_res);
 
       if (status == AR_OK) {
         *result = s21_from_big_to_decimal(tmp_res);
