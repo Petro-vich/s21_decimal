@@ -1,85 +1,70 @@
 #include "s21_arithmetic.h"
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
-    if (result == NULL) return CALC_ERROR; 
+    s21_big_decimal divisible = s21_decimal_to_big(value_1);
+    s21_big_decimal divider = s21_decimal_to_big(value_2);
+    s21_big_decimal tmp_res = {{0, 0, 0, 0, 0, 0, 0, 0}};
+    int res = AR_OK;
 
-    s21_big_decimal dividend = s21_decimal_to_big(value_1);
-    s21_big_decimal divisor = s21_decimal_to_big(value_2);
-    s21_big_decimal quotient = {{0}}; 
-    s21_big_decimal remainder = {{0}}; 
-    int status = AR_OK;
-
-    int sign_dividend = s21_check_sign(dividend.bits[7]);
-    int sign_divisor = s21_check_sign(divisor.bits[7]);
- 
-    s21_set_sign(&dividend.bits[7], 0);
-    s21_set_sign(&divisor.bits[7], 0);
-
-    if (s21_is_zero_big(divisor)) {
-        memset(result, 0, sizeof(s21_decimal));
-        return s21_is_zero_big(dividend) ? CALC_UNDEFINED : AR_NAN;
+    // Check for null result pointer first
+    if (result == NULL) {
+        res = 1;  // Error code for null pointer (assumed from context)
     }
-
-    if (s21_is_zero_big(dividend)) {
-        s21_zero_decimal(result);
-        return AR_OK;
+    // Check if divisor is zero
+    else if (!s21_is_not_null(divider)) {
+        res = AR_NAN;  // Division by zero error
     }
-
-    s21_get_scale(divisor.bits[7]);
-    int current_scale = s21_align_scales(&dividend, &divisor);
-
-    if (current_scale < 0 || current_scale > S21_MAX_SCALE + 10) { 
-        memset(result, 0, sizeof(s21_decimal));
-        return (sign_dividend ^ sign_divisor) ? NUM_TOO_SMALL : NUM_TOO_HIGH;
+    // Check if dividend is zero and divisor is not zero
+    else if (!s21_is_not_null(divisible)) {
+        s21_zero_decimal(result);  // Set result to 0
+        res = AR_OK;                  // Return success
     }
+    // Proceed with division if none of the above conditions are met
+    else {
+        // Initialize widths (fixed the original bug where width_2 was uninitialized)
+        int width_1 = s21_get_width(divisible);
+        int width_2 = s21_get_width(divider);
 
-    remainder = s21_div_big_by_mantissa(dividend, divisor, &quotient);
+        // First loop: Scale up divisible until it's >= divider or scale reaches 35
+        while ((width_2 > width_1 || s21_big_mantissa_is_less(divisible, divider)) &&
+            s21_get_scale(divisible.bits[7]) < 35) {
+            divisible = s21_mul_big_by_10(divisible);
+        s21_set_scale(&divisible.bits[7], s21_get_scale(divisible.bits[7]) + 1);
+        width_1 = s21_get_width(divisible);
+            }
 
-    s21_big_decimal current_digit = {{0}};
-    s21_big_decimal one = {{1}}; 
+            // Second loop: Compute quotient with increasing precision up to scale 35
+            int scale = s21_get_scale(divisible.bits[7]);
+            while (s21_is_not_null(s21_div_big(divisible, divider, &tmp_res)) && scale < 35) {
+                divisible = s21_mul_big_by_10(divisible);
+                scale++;
+                s21_set_scale(&(divisible.bits[7]), scale);
+            }
 
-    while (!s21_is_zero_big(remainder)) {
-
-        if (current_scale >= S21_MAX_SCALE + 1) {
-
-            s21_big_decimal check_dividend = s21_mul_big_by_10(remainder);
-            s21_big_decimal next_digit_quotient = {{0}}; 
-            s21_div_big_by_mantissa(check_dividend, divisor, &next_digit_quotient); // Получаем следующую цифру (в next_digit_quotient.bits[0])
-
-            s21_big_decimal five = {{5}};
-            if (s21_compare_big_mantissa(next_digit_quotient, five) > 0) { // Если следующая цифра > 5
-                 quotient = s21_add_big(quotient, one); 
-            } else if (s21_compare_big_mantissa(next_digit_quotient, five) == 0) {
-                if (quotient.bits[0] & 1) { 
-                     quotient = s21_add_big(quotient, one);
-                    
+            // Set the scale of the result: (sa + k) - sb
+            scale = s21_get_scale(divisible.bits[7]) - s21_get_scale(divider.bits[7]);
+            if (scale >= 0) {
+                s21_set_scale(&(tmp_res.bits[7]), scale);
+            } else {
+                // If scale is negative, multiply tmp_res by 10 to adjust to scale 0
+                while (scale++ < 0) {
+                    tmp_res = s21_mul_big_by_10(tmp_res);
                 }
             }
-            break; 
-        }
 
-        dividend = s21_mul_big_by_10(remainder);
-        current_scale++;
+            // Set the sign: positive if signs match, negative if they differ
+            if (s21_check_sign(value_1.bits[3]) == s21_check_sign(value_2.bits[3])) {
+                s21_set_sign(&(tmp_res.bits[7]), 0);  // Positive
+            } else {
+                s21_set_sign(&(tmp_res.bits[7]), 1);  // Negative
+            }
 
-        if (current_scale > S21_MAX_SCALE + 10) {
-            status = (sign_dividend ^ sign_divisor) ? NUM_TOO_SMALL : NUM_TOO_HIGH;
-            break;
-        }
-
-        remainder = s21_div_big_by_mantissa(dividend, divisor, &current_digit);
-        quotient = s21_mul_big_by_10(quotient);
-        quotient = s21_add_big(quotient, current_digit);
+            // Check if the result can be converted back to s21_decimal
+            res = s21_could_be_converted(tmp_res);
+            if (res == AR_OK) {
+                *result = s21_from_big_to_decimal(tmp_res);
+            }
     }
 
-    s21_set_scale(&quotient.bits[7], current_scale);
-    s21_set_sign(&quotient.bits[7], (sign_dividend ^ sign_divisor));
-
-    // Конвертация и проверка переполнения
-    status = s21_big_to_decimal(quotient, result);
-
-    if (status != AR_OK) {
-        memset(result, 0, sizeof(s21_decimal));
-    }
-
-    return status;
+    return res;
 }

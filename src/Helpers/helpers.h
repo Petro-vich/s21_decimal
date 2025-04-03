@@ -46,6 +46,7 @@
     int s21_big_mantissa_is_greater_or_equal(s21_big_decimal value_1,
                                              s21_big_decimal value_2);
     int s21_check_bit(s21_big_decimal a, int num);
+    int s21_is_not_null(s21_big_decimal a);
     int s21_big_mantissa_is_equal(s21_big_decimal value_1, s21_big_decimal value_2);
     int s21_big_mantissa_is_greater(s21_big_decimal value_1, s21_big_decimal value_2);
     int s21_big_mantissa_is_less(s21_big_decimal value_1, s21_big_decimal value_2);

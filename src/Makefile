@@ -54,8 +54,9 @@ gcov_report:
 
 dick_test: s21_decimal.a $(TEST_OBJ_FILES) $(TEST_MAIN_OBJ)
 	$(CC) $(TEST_OBJ_FILES) $(TEST_MAIN_OBJ) s21_decimal.a -o $@ $(LDFLAGS)
-	@echo "Запуск тестов..."
-	./$@
+	@echo "Running tests and saving results..."
+	./$@ > test_results.txt 2>&1
+	@echo "Test results saved to test_results.txt"
 
 
 clean:

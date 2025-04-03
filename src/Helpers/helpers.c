@@ -80,11 +80,13 @@ int s21_big_to_decimal(s21_big_decimal b_value, s21_decimal *result) {
   return status;
 }
 
-
-// --- Bit Manipulation Helpers for Big Decimal ---
-
-// Gets the value of a specific bit in the big decimal mantissa
-
+int s21_is_not_null(s21_big_decimal a) {
+  return (a.bits[0] == a.bits[1] && a.bits[0] == a.bits[2] &&
+  a.bits[0] == a.bits[3] && a.bits[0] == a.bits[4] &&
+  a.bits[0] == a.bits[5] && a.bits[0] == a.bits[6] && a.bits[0] == 0)
+  ? 0
+  : 1;
+}
 
 // Sets a specific bit in the big decimal mantissa (to 1 or 0)
 void s21_set_bit(s21_big_decimal *a, int num, int choice) {
@@ -455,3 +457,5 @@ int s21_big_mantissa_is_greater_or_equal(s21_big_decimal value_1,
 int s21_check_bit(s21_big_decimal a, int num) {
   return (a.bits[num / 32] >> (num % 32)) & 1;
 }
+
+
