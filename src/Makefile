@@ -3,10 +3,10 @@ CFLAGS = -Wall #Wextra #-Werror
 LDFLAGS = -lcheck -lsubunit -lm
 
 #################################################################################
-TEST_FILES := $(filter-out big_dick_test/test.c, $(wildcard big_dick_test/test_s21_*.c))
+TEST_FILES := $(filter-out tests/test.c, $(wildcard tests/test_s21_*.c))
 TEST_OBJ_FILES := $(TEST_FILES:.c=.o)
-TEST_MAIN := big_dick_test/test.c
-TEST_MAIN_OBJ := big_dick_test/test.o
+TEST_MAIN := tests/test.c
+TEST_MAIN_OBJ := tests/test.o
 #################################################################################
 
 SRC_AR = $(wildcard Arithmetic/*.c)
@@ -52,9 +52,9 @@ gcov_report:
 		genhtml coverage_report/coverage.info --output-directory coverage_report/
 		xdg-open coverage_report/index.html
 
-dick_test: s21_decimal.a $(TEST_OBJ_FILES) $(TEST_MAIN_OBJ)
+test: s21_decimal.a $(TEST_OBJ_FILES) $(TEST_MAIN_OBJ)
 	$(CC) $(TEST_OBJ_FILES) $(TEST_MAIN_OBJ) s21_decimal.a -o $@ $(LDFLAGS)
 	./$@
 
 clean:
-	rm -rf $(ALL_SRC_OBJ) s21_decimal.a tests/test_decimal tests/*.gcno tests/*.gcda coverage_report big_dick_test/*.gcno big_dick_test/*.gcda big_dick_test/*.o dick_test
+	rm -rf $(ALL_SRC_OBJ) s21_decimal.a tests/test_decimal tests/*.gcno tests/*.gcda coverage_report tests/*.gcno tests/*.gcda tests/*.o dick_test
