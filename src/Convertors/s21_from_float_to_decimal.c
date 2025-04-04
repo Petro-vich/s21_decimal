@@ -4,31 +4,42 @@ int s21_from_float_to_decimal(float src, s21_decimal *dst) {
   if (!dst || isnan(src) || isinf(src)) return CONVERSION_ERROR;
 
   memset(dst, 0, sizeof(*dst));
-  int sign = (src < 0) ? 1 : 0;
+
+  int sign = src < 0;
   src = fabsf(src);
 
-  // Прямое извлечение мантиссы и экспоненты (IEEE 754)
-  uint32_t bits = *((uint32_t*)&src);
-  int exp = ((bits >> 23) & 0xFF) - 127;
-  uint32_t mantissa = (bits & 0x007FFFFF) | 0x00800000;
+  // Определяем порядок числа
+  int exponent = (int)floorf(log10f(src));
+  int scale = 0;
 
-  // Нормализация до 7 значащих цифр
-  s21_decimal tmp = {0};
-  while (mantissa > 9999999) {
-    mantissa /= 10;
-    exp++;
+  // Если число содержит более 7 значащих цифр, округляем его
+  if (exponent >= 7) {
+      float factor = powf(10.0f, exponent - 6);
+      src = roundf(src / factor) * factor;
+  } else {
+      // Масштабируем число до целого значения с максимальным масштабом 28
+      while (scale < 28 && floorf(src) != src) {
+          src *= 10.0f;
+          scale++;
+      }
   }
 
-  tmp.bits[0] = mantissa;
-  s21_set_scale(&tmp.bits[3], 6 - exp); // 6 цифр после точки
-  s21_set_sign(&tmp.bits[3], sign);
+  // Преобразуем в целое число с округлением
+  uint64_t int_val = (uint64_t)(src + 0.5f);
 
-  // Проверка допустимого масштаба
-  if (6 - exp < 0 || 6 - exp > 28) {
-    memset(dst, 0, sizeof(*dst));
-    return CONVERSION_ERROR;
+  // Проверяем переполнение
+  if (int_val > 0xFFFFFFFFFFFFFFFF) {
+      return CONVERSION_ERROR;
   }
 
-  *dst = tmp;
+  // Записываем значение по 32-битным частям
+  dst->bits[0] = (uint32_t)(int_val & 0xFFFFFFFF);
+  dst->bits[1] = (uint32_t)((int_val >> 32) & 0xFFFFFFFF);
+  dst->bits[2] = 0;
+
+  // Устанавливаем scale и sign
+  dst->bits[3] = (scale << 16);
+  if (sign) dst->bits[3] |= 0x80000000;
+
   return CNV_OK;
 }
