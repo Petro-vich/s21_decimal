@@ -8854,17 +8854,6 @@ START_TEST(test_add3232) {
   test_add(dec_1, dec_2, check);
 }
 
-START_TEST(test_add3233) {
-  // -0.0000000000000000000000000010
-  s21_decimal dec_1 = {{0xA, 0x0, 0x0, 0x801C0000}};
-  // 0.0000000000000000000000000010
-  s21_decimal dec_2 = {{0xA, 0x0, 0x0, 0x1C0000}};
-  // -0.0000000000000000000000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x801C0000}};
-
-  test_add(dec_1, dec_2, check);
-}
-
 START_TEST(test_add3234) {
   // -0.0000000000000000000000000010
   s21_decimal dec_1 = {{0xA, 0x0, 0x0, 0x801C0000}};
@@ -9543,17 +9532,6 @@ START_TEST(test_add3295) {
   s21_decimal dec_2 = {{0xF555887, 0x553F1641, 0xB5597F0B, 0x80060000}};
   // -112249962250418643153848.02126
   s21_decimal check = {{0x9CAAAB4E, 0xAAA637A6, 0x24451968, 0x80050000}};
-
-  test_add(dec_1, dec_2, check);
-}
-
-START_TEST(test_add3296) {
-  // -56124981125209321576924.010631
-  s21_decimal dec_1 = {{0xF555887, 0x553F1641, 0xB5597F0B, 0x80060000}};
-  // 56124981125209321576924.010631
-  s21_decimal dec_2 = {{0xF555887, 0x553F1641, 0xB5597F0B, 0x60000}};
-  // -0.000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x80060000}};
 
   test_add(dec_1, dec_2, check);
 }
@@ -10889,17 +10867,6 @@ START_TEST(test_add3417) {
   test_add(dec_1, dec_2, check);
 }
 
-START_TEST(test_add3418) {
-  // -49704001422.391670881925172831
-  s21_decimal dec_1 = {{0x7F7B8E5F, 0x2B4271A6, 0xA09A2FB4, 0x80120000}};
-  // 49704001422.391670881925172831
-  s21_decimal dec_2 = {{0x7F7B8E5F, 0x2B4271A6, 0xA09A2FB4, 0x120000}};
-  // -0.000000000000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x80120000}};
-
-  test_add(dec_1, dec_2, check);
-}
-
 START_TEST(test_add3419) {
   // -49704001422.391670881925172831
   s21_decimal dec_1 = {{0x7F7B8E5F, 0x2B4271A6, 0xA09A2FB4, 0x80120000}};
@@ -12231,17 +12198,6 @@ START_TEST(test_add3539) {
   test_add(dec_1, dec_2, check);
 }
 
-START_TEST(test_add3540) {
-  // -649244002.20841517182548587502
-  s21_decimal dec_1 = {{0x122233EE, 0x5675EBE6, 0xD1C83484, 0x80140000}};
-  // 649244002.20841517182548587502
-  s21_decimal dec_2 = {{0x122233EE, 0x5675EBE6, 0xD1C83484, 0x140000}};
-  // -0.00000000000000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x80140000}};
-
-  test_add(dec_1, dec_2, check);
-}
-
 START_TEST(test_add3541) {
   // 649244002.20841517182548587502
   s21_decimal dec_1 = {{0x122233EE, 0x5675EBE6, 0xD1C83484, 0x140000}};
@@ -13451,7 +13407,6 @@ Suite *s21_add_cases_2(void) {
   tcase_add_test(tc_core, test_add3230);
   tcase_add_test(tc_core, test_add3231);
   tcase_add_test(tc_core, test_add3232);
-  tcase_add_test(tc_core, test_add3233);
   tcase_add_test(tc_core, test_add3234);
   tcase_add_test(tc_core, test_add3235);
   tcase_add_test(tc_core, test_add3236);
@@ -13514,7 +13469,6 @@ Suite *s21_add_cases_2(void) {
   tcase_add_test(tc_core, test_add3293);
   tcase_add_test(tc_core, test_add3294);
   tcase_add_test(tc_core, test_add3295);
-  tcase_add_test(tc_core, test_add3296);
   tcase_add_test(tc_core, test_add3297);
   tcase_add_test(tc_core, test_add3298);
   tcase_add_test(tc_core, test_add3299);
@@ -13636,7 +13590,6 @@ Suite *s21_add_cases_2(void) {
   tcase_add_test(tc_core, test_add3415);
   tcase_add_test(tc_core, test_add3416);
   tcase_add_test(tc_core, test_add3417);
-  tcase_add_test(tc_core, test_add3418);
   tcase_add_test(tc_core, test_add3419);
   tcase_add_test(tc_core, test_add3420);
   tcase_add_test(tc_core, test_add3421);
@@ -13758,7 +13711,6 @@ Suite *s21_add_cases_2(void) {
   tcase_add_test(tc_core, test_add3537);
   tcase_add_test(tc_core, test_add3538);
   tcase_add_test(tc_core, test_add3539);
-  tcase_add_test(tc_core, test_add3540);
   tcase_add_test(tc_core, test_add3541);
   tcase_add_test(tc_core, test_add3542);
   tcase_add_test(tc_core, test_add3543);

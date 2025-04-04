@@ -9934,8 +9934,6 @@ Suite *s21_div_cases_4(void) {
   return s;
 }
 
-#include "test.h"
-
 START_TEST(s21_div_2_1) {
   // -30979193270988233338679646780
   s21_decimal dec_1 = {{0x984ada3c, 0x500c5485, 0x64196358, 0x80000000}};
@@ -16892,7 +16890,6 @@ Suite *s21_div_cases_2(void) {
   suite_add_tcase(c, tc);
   return c;
 }
-#include "test.h"
 
 START_TEST(s21_div_3_1) {
   // -5210563158327.0

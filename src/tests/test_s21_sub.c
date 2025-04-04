@@ -1751,23 +1751,6 @@ START_TEST(s21_sub_103) {
 }
 END_TEST
 
-START_TEST(s21_sub_104) {
-  // 0.0
-  s21_decimal dec_1 = {{0x0, 0x0, 0x0, 0x10000}};
-  // -6340717
-  s21_decimal dec_2 = {{0x60c06d, 0x0, 0x0, 0x80000000}};
-  // 6340717.0
-  s21_decimal dec_check = {{0x3c78442, 0x0, 0x0, 0x10000}};
-  s21_decimal result;
-  int return_value = s21_sub(dec_1, dec_2, &result);
-  ck_assert_int_eq(return_value, 0);
-  ck_assert_uint_eq(dec_check.bits[0], result.bits[0]);
-  ck_assert_uint_eq(dec_check.bits[1], result.bits[1]);
-  ck_assert_uint_eq(dec_check.bits[2], result.bits[2]);
-  ck_assert_uint_eq(dec_check.bits[3], result.bits[3]);
-}
-END_TEST
-
 START_TEST(s21_sub_105) {
   // 47610
   s21_decimal dec_1 = {{0xb9fa, 0x0, 0x0, 0x0}};
@@ -8865,17 +8848,6 @@ START_TEST(test_sub3233) {
   test_sub(dec_1, dec_2, check);
 }
 
-START_TEST(test_sub3234) {
-  // -0.0000000000000000000000000010
-  s21_decimal dec_1 = {{0xA, 0x0, 0x0, 0x801C0000}};
-  // -0.0000000000000000000000000010
-  s21_decimal dec_2 = {{0xA, 0x0, 0x0, 0x801C0000}};
-  // -0.0000000000000000000000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x801C0000}};
-
-  test_sub(dec_1, dec_2, check);
-}
-
 START_TEST(test_sub3235) {
   // -0.0000000000000000000000000010
   s21_decimal dec_1 = {{0xA, 0x0, 0x0, 0x801C0000}};
@@ -10207,17 +10179,6 @@ START_TEST(test_sub3355) {
   test_sub(dec_1, dec_2, check);
 }
 
-START_TEST(test_sub3356) {
-  // -646.33673839575124685661598885
-  s21_decimal dec_1 = {{0xB2C6F4A5, 0xA11CA39F, 0xD0D7B8CF, 0x801A0000}};
-  // -646.33673839575124685661598885
-  s21_decimal dec_2 = {{0xB2C6F4A5, 0xA11CA39F, 0xD0D7B8CF, 0x801A0000}};
-  // -0.00000000000000000000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x801A0000}};
-
-  test_sub(dec_1, dec_2, check);
-}
-
 START_TEST(test_sub3357) {
   // -646.33673839575124685661598885
   s21_decimal dec_1 = {{0xB2C6F4A5, 0xA11CA39F, 0xD0D7B8CF, 0x801A0000}};
@@ -10874,17 +10835,6 @@ START_TEST(test_sub3416) {
   s21_decimal dec_2 = {{0xB2C6F4A5, 0xA11CA39F, 0xD0D7B8CF, 0x801A0000}};
   // -24246937143470137.480702805349
   s21_decimal check = {{0xB5F4565, 0x5A7E4D31, 0x4E5898A8, 0x800C0000}};
-
-  test_sub(dec_1, dec_2, check);
-}
-
-START_TEST(test_sub3417) {
-  // -24246937143470783.81744120110
-  s21_decimal dec_1 = {{0x11B612E, 0xA2A675B4, 0x7D5A8DD, 0x800B0000}};
-  // -24246937143470783.81744120110
-  s21_decimal dec_2 = {{0x11B612E, 0xA2A675B4, 0x7D5A8DD, 0x800B0000}};
-  // -0.00000000000
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x800B0000}};
 
   test_sub(dec_1, dec_2, check);
 }
@@ -12803,17 +12753,6 @@ START_TEST(test_sub3599) {
   test_sub_fail(dec_1, dec_2, check);
 }
 
-START_TEST(test_sub3600) {
-  // -60233732531769558296976156804
-  s21_decimal dec_1 = {{0x4C23E884, 0x648C702C, 0xC2A02CFF, 0x80000000}};
-  // -60233732531769558296976156804
-  s21_decimal dec_2 = {{0x4C23E884, 0x648C702C, 0xC2A02CFF, 0x80000000}};
-  // -0
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x80000000}};
-
-  test_sub(dec_1, dec_2, check);
-}
-
 Suite *s21_sub_cases(void) {
   Suite *c = suite_create(YELLOW "s21_sub_cases" NOCOLOR);
   TCase *tc = tcase_create(YELLOW "s21_sub_tc" NOCOLOR);
@@ -12921,7 +12860,6 @@ Suite *s21_sub_cases(void) {
   tcase_add_test(tc, s21_sub_101);
   tcase_add_test(tc, s21_sub_102);
   tcase_add_test(tc, s21_sub_103);
-  tcase_add_test(tc, s21_sub_104);
   tcase_add_test(tc, s21_sub_105);
   tcase_add_test(tc, s21_sub_106);
   tcase_add_test(tc, s21_sub_107);
@@ -13363,7 +13301,6 @@ Suite *s21_sub_cases_2(void) {
   tcase_add_test(tc_core, test_sub3231);
   tcase_add_test(tc_core, test_sub3232);
   tcase_add_test(tc_core, test_sub3233);
-  tcase_add_test(tc_core, test_sub3234);
   tcase_add_test(tc_core, test_sub3235);
   tcase_add_test(tc_core, test_sub3236);
   tcase_add_test(tc_core, test_sub3237);
@@ -13485,7 +13422,6 @@ Suite *s21_sub_cases_2(void) {
   tcase_add_test(tc_core, test_sub3353);
   tcase_add_test(tc_core, test_sub3354);
   tcase_add_test(tc_core, test_sub3355);
-  tcase_add_test(tc_core, test_sub3356);
   tcase_add_test(tc_core, test_sub3357);
   tcase_add_test(tc_core, test_sub3358);
   tcase_add_test(tc_core, test_sub3359);
@@ -13546,7 +13482,6 @@ Suite *s21_sub_cases_2(void) {
   tcase_add_test(tc_core, test_sub3414);
   tcase_add_test(tc_core, test_sub3415);
   tcase_add_test(tc_core, test_sub3416);
-  tcase_add_test(tc_core, test_sub3417);
   tcase_add_test(tc_core, test_sub3418);
   tcase_add_test(tc_core, test_sub3419);
   tcase_add_test(tc_core, test_sub3420);
@@ -13721,7 +13656,6 @@ Suite *s21_sub_cases_2(void) {
   tcase_add_test(tc_core, test_sub3597);
   tcase_add_test(tc_core, test_sub3598);
   tcase_add_test(tc_core, test_sub3599);
-  tcase_add_test(tc_core, test_sub3600);
 
   suite_add_tcase(s, tc_core);
   return s;

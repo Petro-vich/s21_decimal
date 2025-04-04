@@ -1,84 +1,64 @@
-#include "./../Helpers/helpers.h"
+#include "s21_arithmetic.h"
 
 int s21_div(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
+  s21_big_decimal divisible = s21_decimal_to_big(value_1);
+  s21_big_decimal divider = s21_decimal_to_big(value_2);
+  s21_big_decimal tmp_res = {{0, 0, 0, 0, 0, 0, 0, 0}};
+  int res = AR_OK;
+
   if (result == NULL) {
-    return AR_NAN;  // Error: null result pointer
+    res = 1;
   }
 
-  if (s21_is_zero(value_2)) {
-    return AR_NAN;  // Error: division by zero
+  else if (!s21_is_not_null(divider)) {
+    res = AR_NAN;
   }
 
-  int scale1 = s21_get_exp(value_1);
-  int scale2 = s21_get_exp(value_2);
-
-  if (scale1 > 28 || scale2 > 28) {
-    return AR_NAN;  // Error: invalid scale
+  else if (!s21_is_not_null(divisible)) {
+    s21_zero_decimal(result);
+    res = AR_OK;
   }
 
-  // Determine result sign
-  int sign1 = s21_get_sign(value_1);
-  int sign2 = s21_get_sign(value_2);
-  int result_sign = sign1 ^ sign2;
+  else {
+    int width_1 = s21_get_width(divisible);
+    int width_2 = s21_get_width(divider);
 
-  // Get absolute values
-  s21_decimal abs_1 = s21_absoulute_decimal(value_1);
-  s21_decimal abs_2 = s21_absoulute_decimal(value_2);
+    while (
+        (width_2 > width_1 || s21_big_mantissa_is_less(divisible, divider)) &&
+        s21_get_scale(divisible.bits[7]) < 35) {
+      divisible = s21_mul_big_by_10(divisible);
+      s21_set_scale(&divisible.bits[7], s21_get_scale(divisible.bits[7]) + 1);
+      width_1 = s21_get_width(divisible);
+    }
 
-  // Normalize scales (if needed)
-  s21_normalize_scales(&abs_1, &abs_2);
+    int scale = s21_get_scale(divisible.bits[7]);
+    while (s21_is_not_null(s21_div_big(divisible, divider, &tmp_res)) &&
+           scale < 35) {
+      divisible = s21_mul_big_by_10(divisible);
+      scale++;
+      s21_set_scale(&(divisible.bits[7]), scale);
+    }
 
-  // Perform integer division
-  s21_decimal quotient = {0};
-  s21_decimal remainder = {0};
-  s21_divide_integer(abs_1, abs_2, &quotient, &remainder);
-
-  // Calculate fractional part
-  s21_decimal fractional = {0};
-  int scale = 0;
-
-  while (!s21_is_zero(remainder) && scale < 28) {
-    s21_multiply_by_10(&fractional);  // Fix: Shift fractional left
-    s21_multiply_by_10(&remainder);
-    s21_decimal temp = {0};
-    s21_divide_integer(remainder, abs_2, &temp, &remainder);
-    s21_add(fractional, temp, &fractional);
-    scale++;
-  }
-
-  // Handle rounding if precision limit reached
-  if (scale == 28 && !s21_is_zero(remainder)) {
-    s21_decimal half_divisor;
-    s21_decimal two = {{2, 0, 0, 0}};
-    s21_divide_integer(abs_2, two, &half_divisor, &(s21_decimal){0});
-
-    if (s21_compare(remainder, half_divisor) > 0) {
-      s21_add(fractional, two, &fractional);  // Round up
-    } else if (s21_compare(remainder, half_divisor) == 0) {
-      if (fractional.bits[0] & 1) {
-        s21_add(fractional, two, &fractional);  // Round to even
+    scale = s21_get_scale(divisible.bits[7]) - s21_get_scale(divider.bits[7]);
+    if (scale >= 0) {
+      s21_set_scale(&(tmp_res.bits[7]), scale);
+    } else {
+      while (scale++ < 0) {
+        tmp_res = s21_mul_big_by_10(tmp_res);
       }
     }
-    // Check for overflow after rounding
-    if (s21_is_overflow(&fractional)) {
-      scale--;
-      s21_divide_integer(fractional, two, &fractional, &remainder);
-      s21_add(quotient, fractional, &quotient);
-      fractional = remainder;
+
+    if (s21_check_sign(value_1.bits[3]) == s21_check_sign(value_2.bits[3])) {
+      s21_set_sign(&(tmp_res.bits[7]), 0);
+    } else {
+      s21_set_sign(&(tmp_res.bits[7]), 1);
+    }
+
+    res = s21_could_be_converted(tmp_res);
+    if (res == AR_OK) {
+      *result = s21_from_big_to_decimal(tmp_res);
     }
   }
 
-  // Combine integer and fractional parts
-  s21_combine_parts(quotient, fractional, scale, result);
-
-  // Check for overflow
-  if (s21_is_overflow(result)) {
-    return result_sign ? NUM_TOO_SMALL : NUM_TOO_HIGH;
-  }
-
-  // Set sign and scale
-  s21_set_sign(result, result_sign);
-  s21_set_scale(result, scale);
-
-  return 0;  // Success
+  return res;
 }

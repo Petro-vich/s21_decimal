@@ -1,25 +1,30 @@
 #include "s21_other_functions.h"
 
 int s21_round(s21_decimal value, s21_decimal *result) {
-  s21_zero_decimal(result);
-  long double fl_to_round = 0.0;
-  long double difference = 0;
-  s21_from_decimal_to_double(value, &fl_to_round);
-  fl_to_round = round(fl_to_round);
-  if (fl_to_round < 0.0) {
-    s21_set_bit(result, 127, 1);
+  int error = OTH_OK;
+  int sign = s21_check_sign(value.bits[3]);
+  s21_decimal truncated = {0};
+  s21_decimal one = {{1, 0, 0, 0}};
 
-    fl_to_round *= -1;
-  }
-  for (int i = 0; fl_to_round >= 1 && i < 96; i++) {
-    fl_to_round = floor(fl_to_round) / 2;
-    difference = fl_to_round - floor(fl_to_round);
-    if (difference > 0.0) {
-      s21_set_bit(result, i, 1);
-    } else {
-      s21_set_bit(result, i, 0);
+  error = s21_truncate(value, &truncated);
+  if (error == OTH_OK) {
+    s21_decimal fraction = {0};
+    error = s21_sub(value, truncated, &fraction);
+    if (error == OTH_OK) {
+      if (fraction.bits[0] != 0 || fraction.bits[1] != 0 ||
+          fraction.bits[2] != 0) {
+        s21_big_decimal big_fraction = s21_decimal_to_big(fraction);
+        s21_big_decimal half = {{5, 0, 0, 0, 0, 0, 0, (1 << 16)}};
+        s21_normalize_big(&big_fraction, &half);
+        if (s21_big_mantissa_is_equal(big_fraction, half) ||
+            s21_big_mantissa_is_greater(big_fraction, half)) {
+          error = (sign == 0) ? s21_add(truncated, one, &truncated)
+                              : s21_sub(truncated, one, &truncated);
+        }
+      }
     }
   }
-  s21_set_scale(result, 0);
-  return 0;
+
+  *result = truncated;
+  return error;
 }
