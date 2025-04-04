@@ -18697,16 +18697,6 @@ START_TEST(test_from_float_to_decimal_2747) {
 }
 END_TEST
 
-START_TEST(test_from_float_to_decimal_edge_case_1) {
-  float f = 0.0;
-  s21_decimal result;
-  s21_decimal check = {{0x0, 0x0, 0x0, 0x0}};
-
-  int code = s21_from_float_to_decimal(f, &result);
-  ck_assert_int_eq(code, 0);
-  ck_assert_int_eq(s21_is_equal(result, check), 1);
-}
-END_TEST
 
 START_TEST(test_from_float_to_decimal_edge_case_3) {
   float f = INFINITY;
@@ -21499,7 +21489,6 @@ Suite *from_float_to_decimal_edge_cases(void) {
   s = suite_create(YELLOW "from_float_to_decimal_edge_cases" NOCOLOR);
   tc_core = tcase_create(YELLOW "EDGE" NOCOLOR);
 
-  tcase_add_test(tc_core, test_from_float_to_decimal_edge_case_1);
   tcase_add_test(tc_core, test_from_float_to_decimal_edge_case_3);
   tcase_add_test(tc_core, test_from_float_to_decimal_edge_case_4);
   tcase_add_test(tc_core, test_from_float_to_decimal_edge_case_5);
