@@ -32,13 +32,10 @@ int s21_is_zero_big(s21_big_decimal b_value) {
 
 // Converts s21_decimal to s21_big_decimal
 s21_big_decimal s21_decimal_to_big(s21_decimal value) {
-  s21_big_decimal result = {{0}}; // Initialize all to 0
-  result.bits[0] = value.bits[0];
-  result.bits[1] = value.bits[1];
-  result.bits[2] = value.bits[2];
-  // Copy scale and sign directly
-  result.bits[7] = value.bits[3];
-  return result;
+  s21_big_decimal d = {{0, 0, 0, 0, 0, 0, 0, 0}};
+  for (int i = 0; i < 3; i++) d.bits[i] = value.bits[i];
+  d.bits[7] = value.bits[3];
+  return d;
 }
 
 // Converts s21_big_decimal to s21_decimal after normalization
