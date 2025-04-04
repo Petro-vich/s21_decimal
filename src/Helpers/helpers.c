@@ -261,14 +261,16 @@ s21_big_decimal s21_div_big_by_mantissa(s21_big_decimal b_dividend,
                                         // --- Normalization Helper ---
                                         void s21_normalize_big(s21_big_decimal *value_1, s21_big_decimal *value_2) {
                                           int delta = s21_get_scale(value_1->bits[7]) - s21_get_scale(value_2->bits[7]);
-                                          while (delta != 0) {
-                                            if (delta > 0) {
-                                              *value_2 = s21_mul_big_by_10(*value_2);
-                                              delta--;
-                                            } else {
-                                              *value_1 = s21_mul_big_by_10(*value_1);
-                                              delta++;
-                                            }
+
+                                          while (delta > 0) {
+                                            *value_2 = s21_mul_big_by_10(*value_2);
+                                            s21_set_scale(&(value_2->bits[7]), s21_get_scale((value_1->bits[7])));
+                                            delta--;
+                                          }
+                                          while (delta < 0) {
+                                            *value_1 = s21_mul_big_by_10(*value_1);
+                                            s21_set_scale(&(value_1->bits[7]), s21_get_scale((value_2->bits[7])));
+                                            delta++;
                                           }
                                         }
                                         s21_big_decimal s21_shift_big(s21_big_decimal a, int value, char vector) {
