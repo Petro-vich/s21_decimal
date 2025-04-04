@@ -1,22 +1,15 @@
 #ifndef S21_DECIMAL_H_
 #define S21_DECIMAL_H_
+#define CALC_ERROR 1
+#define CALC_UNDEFINED 6 
 
+#define S21_MAX_SCALE 28
 #include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
 
-#define S21_DECIMAL_OK 0
-#define S21_DECIMAL_ERR 1
-#define S21_DECIMAL_INF 2
-#define S21_DECIMAL_NEG_INF 3
-#define S21_DECIMAL_DIV_BY_ZERO 4
-#define S21_DECIMAL_OVERFLOW 5
-#define S21_DECIMAL_UNDEFINED 6
-
-#define S21_MAX_SCALE 28
-#define S21_MAX_BITS 96
 
 typedef struct {
   unsigned bits[4]; // [0-2: мантисса, 3: знак и масштаб]

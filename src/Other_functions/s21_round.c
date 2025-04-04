@@ -27,7 +27,7 @@ int s21_round(s21_decimal value, s21_decimal *result) {
   }
 
   // Обработка отрицательных чисел
-  if (s21_get_sign(value)) {
+  if (s21_check_sign(value.bits[3])) {
     s21_negate(*result, result);
   }
   return status;
