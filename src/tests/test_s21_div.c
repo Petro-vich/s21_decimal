@@ -16891,6 +16891,17 @@ Suite *s21_div_cases_2(void) {
   return c;
 }
 
+START_TEST(s21_div_3_0) {
+  // -5210563158327.0
+  s21_decimal dec_1 = {{0xc9a94c26, 0x2f63, 0x0, 0x80010000}};
+  // 7060441223.83345
+  s21_decimal dec_2 = {{0xb51c43f1, 0x28224, 0x0, 0x50000}};
+  // -737.99398552289582777622146807
+  int return_value = s21_div(dec_1, dec_2, NULL);
+  ck_assert_int_eq(return_value, 1);
+}
+END_TEST
+
 START_TEST(s21_div_3_1) {
   // -5210563158327.0
   s21_decimal dec_1 = {{0xc9a94c26, 0x2f63, 0x0, 0x80010000}};
@@ -23742,10 +23753,25 @@ START_TEST(s21_div_3_500) {
 }
 END_TEST
 
+START_TEST(s21_div_3_501) {
+  //  0
+  s21_decimal dec_1 = {{0x0, 0x0, 0x0, 0x0}};
+  s21_decimal dec_2 = {{0x1e241, 0x0, 0x0, 0x20000}};
+  
+  s21_decimal result;
+  int return_value = s21_div(dec_1, dec_2, &result);
+
+  ck_assert_int_eq(return_value, 0);
+
+}
+END_TEST
+
+
 Suite *s21_div_cases_3(void) {
   Suite *c = suite_create("s21_div_3_cases3");
   TCase *tc = tcase_create("s21_div_3_tc");
-
+  
+  tcase_add_test(tc, s21_div_3_0);
   tcase_add_test(tc, s21_div_3_1);
   tcase_add_test(tc, s21_div_3_3);
   tcase_add_test(tc, s21_div_3_5);
@@ -24149,6 +24175,9 @@ Suite *s21_div_cases_3(void) {
   tcase_add_test(tc, s21_div_3_495);
   tcase_add_test(tc, s21_div_3_498);
   tcase_add_test(tc, s21_div_3_500);
+  tcase_add_test(tc, s21_div_3_501);
+
+  
 
   suite_add_tcase(c, tc);
   return c;
