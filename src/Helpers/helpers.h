@@ -10,10 +10,7 @@
 #include "../s21_decimal.h"
 
 enum ERROR_CODES_HELPERS { HELPERS_OK, HELPERS_ERROR, CALC_OVERFLOW };
-// 0 — OK;
-// 1 — ошибка вычисления.
 
-// Геттеры и сеттеры
 int s21_is_zero(s21_decimal value);
 void s21_zero_decimal(s21_decimal *dst);
 int s21_get_scale(unsigned value);
