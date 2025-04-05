@@ -52,7 +52,7 @@ gcov_report:
 	xdg-open coverage_report/index.html || open coverage_report/index.html
 
 clang-format:
-	clang-format -n $(ALL_SRC) tests/*.c $(HEDER_FILE)
+	clang-format -i $(ALL_SRC) tests/*.c $(HEDER_FILE)
 
 clean:
 	rm -f $(OBJS) s21_decimal.a test test_valgrind
