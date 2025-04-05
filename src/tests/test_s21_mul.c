@@ -10218,6 +10218,16 @@ START_TEST(fail_s21_mul_140) {
 }
 END_TEST
 
+START_TEST(test_mul3201) {
+  // -57476540395758265626.742442133
+  s21_decimal dec_1 = {{0xD42B4895, 0x339BF28D, 0xB9B77ADA, 0x80090000}};
+  // 1.9999999999999999999999999000
+  s21_decimal dec_2 = {{0x1FFFFC18, 0x7C4A04C2, 0x409F9CBC, 0x1C0000}};
+  // -114953080791516531253.48487852
+  int res = s21_mul(dec_1, dec_2, NULL);
+  ck_assert_int_eq(1, res);
+} END_TEST 
+
 START_TEST(test_mul2801) {
   // 0.0000000000000000000000000001
   s21_decimal dec_1 = {{0x1, 0x0, 0x0, 0x1C0000}};
@@ -13925,6 +13935,7 @@ START_TEST(test_mul3200) {
   test_mul_fail1(dec_1, dec_2, code_check);
 }
 
+
 Suite *s21_mul_cases(void) {
   Suite *c = suite_create(YELLOW "s21_mul_cases" NOCOLOR);
   TCase *tc = tcase_create(YELLOW "s21_mul_tc" NOCOLOR);
@@ -14911,6 +14922,7 @@ Suite *test_s21_mul_suite_2(void) {
   tcase_add_test(tc_core, test_mul3198);
   tcase_add_test(tc_core, test_mul3199);
   tcase_add_test(tc_core, test_mul3200);
+  tcase_add_test(tc_core, test_mul3201);
 
   suite_add_tcase(s, tc_core);
   return s;
