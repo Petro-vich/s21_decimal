@@ -29,6 +29,6 @@ int s21_mul(s21_decimal value_1, s21_decimal value_2, s21_decimal *result) {
       *result = s21_from_big_to_decimal(temp_result);
     }
   } else
-    res = 1;
+    res = CALC_ERROR;
   return res;
 }
