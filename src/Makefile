@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra #-Werror
+CFLAGS = -Wall -Wextra -Werror
 LDFLAGS = -lcheck -lsubunit -lm
 GCOV_FLAGS = --coverage
 
@@ -10,6 +10,8 @@ SRC_CONV = $(wildcard Convertors/*.c)
 SRC_OTH = $(wildcard Other_functions/*.c)
 SRC_HELP = $(wildcard Helpers/*.c)
 ALL_SRC = $(SRC_COMP) $(SRC_CONV) $(SRC_OTH) $(SRC_HELP) $(SRC_AR)
+
+HEDER_FILE = $(wildcard Arithmetic/*.h Comparison/*.h Convertors/*.h Other_functions/*.h Helpers/*.h)
 
 # Test files
 TEST_FILES = $(wildcard tests/test_*.c)
@@ -30,8 +32,8 @@ s21_decimal.a: $(OBJS)
 
 # Regular test build
 test: s21_decimal.a $(TEST_OBJS) $(TEST_MAIN_OBJ)
-	$(CC) $(TEST_OBJS) $(TEST_MAIN_OBJ) s21_decimal.a -o $@ $(LDFLAGS)
-	./$@
+	$(CC) $(TEST_OBJS) $(TEST_MAIN_OBJ) s21_decimal.a -o tests/$@ $(LDFLAGS)
+	./tests/$@
 
 # Test with valgrind
 test_valgrind: s21_decimal.a $(TEST_OBJS) $(TEST_MAIN_OBJ)
@@ -50,10 +52,10 @@ gcov_report:
 	xdg-open coverage_report/index.html || open coverage_report/index.html
 
 clang-format:
-	clang-format -i $(ALL_SRC) tests/*.c
+	clang-format -n $(ALL_SRC) tests/*.c $(HEDER_FILE)
 
 clean:
 	rm -f $(OBJS) s21_decimal.a test test_valgrind
 	rm -rf coverage_report
-	rm -f tests/*.gcno tests/*.gcda tests/*.o
+	rm -f tests/*.gcno tests/*.gcda tests/*.o tests/test
 	rm -f $(ALL_SRC:.c=.gcno) $(ALL_SRC:.c=.gcda)
