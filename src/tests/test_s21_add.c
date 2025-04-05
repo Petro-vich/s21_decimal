@@ -8502,6 +8502,15 @@ START_TEST(fail_s21_add_6) {
 }
 END_TEST
 
+START_TEST(fail_s21_add_7) {
+  s21_decimal dec_1 = {{0x1, 0x0, 0x0, 0x00000000}};
+  s21_decimal dec_2 = {{0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000}};
+
+  int return_value = s21_add(dec_1, dec_2, NULL);
+  ck_assert_int_eq(return_value, CALC_ERROR);
+}
+END_TEST
+
 START_TEST(test_add3201) {
   // -0.0000000000000000000000000010
   s21_decimal dec_1 = {{0xA, 0x0, 0x0, 0x801C0000}};
@@ -13364,6 +13373,8 @@ Suite *s21_add_cases(void) {
   tcase_add_test(tc, fail_s21_add_4);
   tcase_add_test(tc, fail_s21_add_5);
   tcase_add_test(tc, fail_s21_add_6);
+  tcase_add_test(tc, fail_s21_add_7);
+
 
   suite_add_tcase(c, tc);
   return c;
