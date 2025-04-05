@@ -12,7 +12,7 @@
 
 #define BIG_MAX 20
 #define SMALL_MAX 8
-
+ 
 void test_from_decimal_to_float(s21_decimal decimal, float num);
 void test_from_float_to_decimal(float f, s21_decimal decimal_check);
 void test_from_decimal_to_int(s21_decimal decimal, int check);

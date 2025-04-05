@@ -13375,7 +13375,6 @@ Suite *s21_add_cases(void) {
   tcase_add_test(tc, fail_s21_add_6);
   tcase_add_test(tc, fail_s21_add_7);
 
-
   suite_add_tcase(c, tc);
   return c;
 }

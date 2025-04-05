@@ -10226,7 +10226,8 @@ START_TEST(test_mul3201) {
   // -114953080791516531253.48487852
   int res = s21_mul(dec_1, dec_2, NULL);
   ck_assert_int_eq(1, res);
-} END_TEST 
+}
+END_TEST
 
 START_TEST(test_mul2801) {
   // 0.0000000000000000000000000001
@@ -13934,7 +13935,6 @@ START_TEST(test_mul3200) {
 
   test_mul_fail1(dec_1, dec_2, code_check);
 }
-
 
 Suite *s21_mul_cases(void) {
   Suite *c = suite_create(YELLOW "s21_mul_cases" NOCOLOR);

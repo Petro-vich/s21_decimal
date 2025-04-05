@@ -23757,20 +23757,18 @@ START_TEST(s21_div_3_501) {
   //  0
   s21_decimal dec_1 = {{0x0, 0x0, 0x0, 0x0}};
   s21_decimal dec_2 = {{0x1e241, 0x0, 0x0, 0x20000}};
-  
+
   s21_decimal result;
   int return_value = s21_div(dec_1, dec_2, &result);
 
   ck_assert_int_eq(return_value, 0);
-
 }
 END_TEST
-
 
 Suite *s21_div_cases_3(void) {
   Suite *c = suite_create("s21_div_3_cases3");
   TCase *tc = tcase_create("s21_div_3_tc");
-  
+
   tcase_add_test(tc, s21_div_3_0);
   tcase_add_test(tc, s21_div_3_1);
   tcase_add_test(tc, s21_div_3_3);
@@ -24176,8 +24174,6 @@ Suite *s21_div_cases_3(void) {
   tcase_add_test(tc, s21_div_3_498);
   tcase_add_test(tc, s21_div_3_500);
   tcase_add_test(tc, s21_div_3_501);
-
-  
 
   suite_add_tcase(c, tc);
   return c;
