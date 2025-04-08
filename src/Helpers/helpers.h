@@ -42,6 +42,5 @@ int s21_is_overflow(s21_big_decimal a);
 int s21_get_width(s21_big_decimal value);
 s21_big_decimal s21_div_big(s21_big_decimal divisible, s21_big_decimal divider,
                             s21_big_decimal *result);
-s21_big_decimal s21_mul_big_by_10(s21_big_decimal value);
 int s21_could_be_converted(s21_big_decimal value);
 #endif
